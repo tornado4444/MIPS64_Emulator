@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35122.118
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MIPS64_Emulator", "MIPS64_Emulator.vcxproj", "{E5DC57B8-217C-4A1C-B5C5-C61628FF670B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E5DC57B8-217C-4A1C-B5C5-C61628FF670B}.Debug|x64.ActiveCfg = Debug|x64
+		{E5DC57B8-217C-4A1C-B5C5-C61628FF670B}.Debug|x64.Build.0 = Debug|x64
+		{E5DC57B8-217C-4A1C-B5C5-C61628FF670B}.Debug|x86.ActiveCfg = Debug|Win32
+		{E5DC57B8-217C-4A1C-B5C5-C61628FF670B}.Debug|x86.Build.0 = Debug|Win32
+		{E5DC57B8-217C-4A1C-B5C5-C61628FF670B}.Release|x64.ActiveCfg = Release|x64
+		{E5DC57B8-217C-4A1C-B5C5-C61628FF670B}.Release|x64.Build.0 = Release|x64
+		{E5DC57B8-217C-4A1C-B5C5-C61628FF670B}.Release|x86.ActiveCfg = Release|Win32
+		{E5DC57B8-217C-4A1C-B5C5-C61628FF670B}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {943A4F2E-2A02-4975-94C0-6C606957D2F3}
+	EndGlobalSection
+EndGlobal
