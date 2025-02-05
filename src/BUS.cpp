@@ -4,17 +4,18 @@
 BUS::BUS() {
 	// TODO to the over this
 	// Initialize for register
-	for (int i = 0; i < 32; i++) {
-		registers[i] = 0;
-	}
+	//for (int i = 0; i < 32; i++) {
+	//	registers[i] = 0;
+	//}
 
-	for (auto& i : memory) i = 0x00; // ????
+	//for (auto& i : memory) i = 0x00; // ????
 
-	MIPS64.connectBus(this); // for the connect the bus
+	//MIPS64.connectBus(this); // for the connect the bus
 }
 
 // DESTRUCTOR
 BUS::~BUS() {
+
 }
 
 // for the write

@@ -1,11 +1,51 @@
-#include "olc_64.hpp"
+﻿#include "olc_64.hpp"
 
 class Bus; // INITIALIZE FROM THE BUS.HPP
 
 // CONSTRUCTOR
 olc_64::olc_64() {
+    for (int i = 0; i < 32; i++) {  // for the bites etc.
+        registers[i] = 0;
+    }
 
+    pc = 0; // Program  Counter
+    hi = 0; // Register HI
+    lo = 0; // Register LO
+
+    using a = olc_64;
+
+    lookup = {
+        {}
+        
+    };
 }
+
+/*
+ ███▄ ▄███▓ ██▓ ██▓███    ██████     ██▓ ███▄    █   ██████ ▄▄▄█████▓ ██▀███   █    ██  ▄████▄  ▄▄▄█████▓ ██▓ ▒█████   ███▄    █
+▓██▒▀█▀ ██▒▓██▒▓██░  ██▒▒██    ▒    ▓██▒ ██ ▀█   █ ▒██    ▒ ▓  ██▒ ▓▒▓██ ▒ ██▒ ██  ▓██▒▒██▀ ▀█  ▓  ██▒ ▓▒▓██▒▒██▒  ██▒ ██ ▀█   █
+▓██    ▓██░▒██▒▓██░ ██▓▒░ ▓██▄      ▒██▒▓██  ▀█ ██▒░ ▓██▄   ▒ ▓██░ ▒░▓██ ░▄█ ▒▓██  ▒██░▒▓█    ▄ ▒ ▓██░ ▒░▒██▒▒██░  ██▒▓██  ▀█ ██▒
+▒██    ▒██ ░██░▒██▄█▓▒ ▒  ▒   ██▒   ░██░▓██▒  ▐▌██▒  ▒   ██▒░ ▓██▓ ░ ▒██▀▀█▄  ▓▓█  ░██░▒▓▓▄ ▄██▒░ ▓██▓ ░ ░██░▒██   ██░▓██▒  ▐▌██▒
+▒██▒   ░██▒░██░▒██▒ ░  ░▒██████▒▒   ░██░▒██░   ▓██░▒██████▒▒  ▒██▒ ░ ░██▓ ▒██▒▒▒█████▓ ▒ ▓███▀ ░  ▒██▒ ░ ░██░░ ████▓▒░▒██░   ▓██░
+░ ▒░   ░  ░░▓  ▒▓▒░ ░  ░▒ ▒▓▒ ▒ ░   ░▓  ░ ▒░   ▒ ▒ ▒ ▒▓▒ ▒ ░  ▒ ░░   ░ ▒▓ ░▒▓░░▒▓▒ ▒ ▒ ░ ░▒ ▒  ░  ▒ ░░   ░▓  ░ ▒░▒░▒░ ░ ▒░   ▒ ▒
+░  ░      ░ ▒ ░░▒ ░     ░ ░▒  ░ ░    ▒ ░░ ░░   ░ ▒░░ ░▒  ░ ░    ░      ░▒ ░ ▒░░░▒░ ░ ░   ░  ▒       ░     ▒ ░  ░ ▒ ▒░ ░ ░░   ░ ▒░
+░      ░    ▒ ░░░       ░  ░  ░      ▒ ░   ░   ░ ░ ░  ░  ░    ░        ░░   ░  ░░░ ░ ░ ░          ░       ▒ ░░ ░ ░ ▒     ░   ░ ░
+       ░    ░                 ░      ░           ░       ░              ░        ░     ░ ░                ░      ░ ░           ░
+    ░
+
+
+    1. General 3-operand format:
+    - op    dest, src1, src2     dest <- src1 op src -----------------> dest, src1, src2 are registers
+    2. Addition:
+    - add   a, b, c              a <- b + c;         ----------------->
+    - addi(unsigned) a, b, 12    a <- b + 12;        -----------------> The "i" in addi if for immediate
+    3. Substraction:
+    - sub   a, b, c              a <- b-c;
+    4. Complex:
+    f = (g + h) - (i + j);
+    - add t0, g, h      t0 <- g + h;
+    - add t1, i, j      t1 <- i + j;
+    - sub f, t0, t1     f  <- t0 - t1;  ------------> Complex oprations generate many instructions with temporary values
+*/
 
 // DESTRUCTOR
 olc_64::~olc_64() {
@@ -51,13 +91,13 @@ void olc_64::dataTransfer(uint32_t instruction) {
         write(address, registers[rt] & 0xFFFFFFFF); // Write 32 bits to memory
         break;
     case 0x29:                                      // sh(Store Halfword)
-        write(address, registers[rt] & 0xFFFF);     // Write 16 ��� to memory
+        write(address, registers[rt] & 0xFFFF);     // Write 16 бит to memory
         break;
     case 0x28:                                      // sb (Store Byte)
         write(address, registers[rt] & 0xFF);       // Write 8 bits to memory
         break;
     case 0x3F:                                      // sd (Store Doubleword) - approximate opcode
-        write(address, registers[rt]);              // Write 64 bits � ������
+        write(address, registers[rt]);              // Write 64 bits в память
         break;
     default:
         std::cerr << "NOTHING HERE 0x : " << std::hex << instruction << std::endl; // for the message error
@@ -93,10 +133,10 @@ void olc_64::systemWork(uint32_t instructions) {
         break;
     case 0x0D: // BREAK
         std::cerr << "BREAK instruction encountered at PC = 0x" << std::hex << pc << std::endl;
-        // � �������� ��������� ����� ����� ������� � ����� �������
+        // В реальном эмуляторе здесь можно перейти в режим отладки
         break;
     case 0x18: // ERET (Exception Return)
-        pc = coprocessor0[31]; // �����������, ��� EPC �������� � �������� 31 ������������ 0
+        pc = coprocessor0[31]; // Предположим, что EPC хранится в регистре 31 сопроцессора 0
         break;
     case 0x00: // MFC0 (Move from Coprocessor 0)
         if (rd < 32) {
@@ -120,13 +160,18 @@ void olc_64::systemWork(uint32_t instructions) {
     }
 }
 
-// ��������� R-��� ����������
+
+
+// R - TYPE INSTRUCTIONS
 void olc_64::handleInstruction_of_R(uint32_t instructions) {
     uint8_t rs = (instructions >> 21) & 0x1F;
     uint8_t rt = (instructions >> 16) & 0x1F;
     uint8_t rd = (instructions >> 11) & 0x1F;
     uint8_t shamt = (instructions >> 6) & 0x1F;
-    uint8_t funct = instructions & 0x3F;
+    uint8_t funct = instructions & 0x3F;        
+
+    // FOR THE JR
+    uint64_t jumpAddress = registers[rs];       // move to address from rs register
 
     switch (funct) {
     case 0x20: // ADD
@@ -134,6 +179,25 @@ void olc_64::handleInstruction_of_R(uint32_t instructions) {
         break;
     case 0x21: // ADDU
         registers[rd] = static_cast<uint64_t>(registers[rs]) + static_cast<uint64_t>(registers[rt]);
+        break;
+    case 0x24: // AND
+        registers[rd] = registers[rs] & registers[rt];
+        break;
+    case 0x1A: // DIV
+        if (registers[rt] != 0) {
+            lo = static_cast<int64_t>(registers[rs]) / static_cast<int64_t>(registers[rt]);
+            hi = static_cast<int64_t>(registers[rs]) % static_cast<int64_t>(registers[rt]);
+        }
+        break;
+    case 0x1B: // DIVU
+        if (registers[rt] != 0) {
+            lo = static_cast<uint64_t>(registers[rs]) / static_cast<uint64_t>(registers[rt]);
+            hi = static_cast<uint64_t>(registers[rs]) % static_cast<uint64_t>(registers[rt]);
+        }
+        break;
+    case 0x09:  // JALR
+        registers[rd] = pc + 4; // SAVE THE ADDRESS TO RETURN 
+        pc = registers[rs];     // Go to address from rs
         break;
     case 0x22: // SUB
         registers[rd] = registers[rs] - registers[rt];
@@ -155,21 +219,6 @@ void olc_64::handleInstruction_of_R(uint32_t instructions) {
         lo = result & 0xFFFFFFFF;
         break;
     }
-    case 0x1A: // DIV
-        if (registers[rt] != 0) {
-            lo = static_cast<int64_t>(registers[rs]) / static_cast<int64_t>(registers[rt]);
-            hi = static_cast<int64_t>(registers[rs]) % static_cast<int64_t>(registers[rt]);
-        }
-        break;
-    case 0x1B: // DIVU
-        if (registers[rt] != 0) {
-            lo = static_cast<uint64_t>(registers[rs]) / static_cast<uint64_t>(registers[rt]);
-            hi = static_cast<uint64_t>(registers[rs]) % static_cast<uint64_t>(registers[rt]);
-        }
-        break;
-    case 0x24: // AND
-        registers[rd] = registers[rs] & registers[rt];
-        break;
     case 0x25: // OR
         registers[rd] = registers[rs] | registers[rt];
         break;
@@ -194,13 +243,16 @@ void olc_64::handleInstruction_of_R(uint32_t instructions) {
     case 0x03: // SRA
         registers[rd] = static_cast<int64_t>(registers[rt]) >> shamt;
         break;
+    case 0x08: // JR(Jump to Address in Register)
+        pc = registers[rt];
+        break;
     default:
         std::cerr << "Unknown R-type instruction: " << std::hex << instructions << std::endl;
         break;
     }
 }
 
-// ��������� I-��� ����������
+// I - TYPE INSTRUCTIONS
 void olc_64::handleInstruction_of_I(uint32_t instruction) {
     uint8_t opcode = (instruction >> 26) & 0x3F;
     uint8_t rs = (instruction >> 21) & 0x1F;
@@ -261,6 +313,7 @@ void olc_64::handleInstruction_of_J(uint32_t instruction) {
     // MIPS64 for J - INSTRUCTIONS
     uint64_t jumpAddress = (pc & 0xFFFFFFFFF0000000) | (address << 2);
 
+    // Unconditional Jump
     switch (opcode) {
     case 0x02:                  // JUMP(J)
         pc = jumpAddress;       // assign the jump adress
@@ -273,7 +326,6 @@ void olc_64::handleInstruction_of_J(uint32_t instruction) {
         std::cerr <<"NOTHING HERE 0x : " << std::hex << instruction << std::endl;
         break;
     }
-
 }
 
 // FOR THE OLC EXECUTE INSTRUCTION

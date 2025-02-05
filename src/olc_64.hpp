@@ -15,6 +15,9 @@
 #pragma once
 #include "BUS.hpp"
 
+// INCLUDE LIBRARIES
+#include <vector>
+
 class olc_64
 {
 public:
@@ -25,6 +28,10 @@ public:
 
 	// for the bus
 	void connectBus(BUS* n) { bus = n; }
+
+public:
+	void clock();	// need for the clock
+	void reset();	// for the reset
 private:
 	// REGISTERS ON MIPS
 	uint64_t registers[32];				// for the 32 registers(R0 - R31)
@@ -65,5 +72,20 @@ private:
 	void handleInstruction_of_I(uint32_t instruction);  // instruction(of I)
 	void handleInstruction_of_J(uint32_t instruction);  // instruction(of J)
 	void executeInstruction(uint32_t instruction);		// Execute more instruction
-};
 
+private:
+	struct INSTRUCTIONS {
+		std::string name;
+		uint64_t(olc_64::*operate)() = nullptr;
+		uint64_t(olc_64::*addrmode)() = nullptr;
+		uint64_t cycles = 0;
+	};
+
+	std::vector<INSTRUCTIONS> lookup;
+
+// the declaring a directive for the preprocessor to create the file
+#ifdef LOGMODE
+private:
+	FILE* logfile = nullptr;
+#endif
+};
