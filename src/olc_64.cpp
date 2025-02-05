@@ -22,77 +22,273 @@ void olc_64::write(uint64_t a, uint64_t d) {
 	bus->write(a, d);
 }
 
+// THE DATA TRASFER
+void olc_64::dataTransfer(uint32_t instruction) {
+    uint8_t opcode = (instruction >> 26) & 0x3F;   // Select opcode
+    uint8_t base = (instruction >> 21) & 0x1F;   // The base register(rs)
+    uint8_t rt = (instruction >> 16) & 0x1F;   // Destination register (rt)
+    uint16_t offset = instruction & 0xFFFF;         // OFFSET
 
-// FOR THE OLC HANDLE INSTRUCTION
-void olc_64::handleInstruction(uint32_t instruction) {
-	uint8_t rs = (instruction >> 21) & 0x1F; // for the rs
-	uint8_t rt = (instruction >> 16) & 0x1F; // for the rt
-	int16_t offset = instruction & 0xFFFF;   // BIAS
+    // Calculate the address in memory : base + offset
+    uint64_t address = registers[base] + static_cast<int64_t>(offset);
 
-	int64_t signed_offset = static_cast<int64_t>(offset); // Signed offset extension to 64 bits
+    switch (opcode) {
+    case 0x23:  // lw(Load Word)
+        registers[rt] = read(address); // To read the 32 bites for the memory
+        break;
+    case 0x21:  // lh (Load Halfword)
+        registers[rt] = static_cast<int64_t>(static_cast<int16_t>(read(address) & 0xFFFF)); // To read the 16 bites and symbolically expand
+        break;
+    case 0x20:  // lb(Load Byte)
+        registers[rt] = static_cast<int64_t>(static_cast<int8_t>(read(address) & 0xFF));    // Read 8 bits and sign expand
+        break;
+    case 0x37: // Read 8 bits and sign expand
+        registers[rt] = read(address);  // To read 64 bites for the memory
+        break;
 
-	if ((instruction >> 26) == 0x04) {         // BEQ
-		if (registers[rs] == registers[rt]) { // for the logic 
-			pc += signed_offset << 2;		 // shift left by 2 bits (multiply by 4) taking into account sign extension
-		}
-	}
-	else if ((instruction >> 26) == 0x05) { // BNE
-		if (registers[rs] != registers[rt]) {
-			pc += signed_offset << 2; // Transition taking into account offset
-		}
-	} 
+        // Store instructions
+    case 0x2B:  // sw (Store Word)
+        write(address, registers[rt] & 0xFFFFFFFF); // Write 32 bits to memory
+        break;
+    case 0x29:                                      // sh(Store Halfword)
+        write(address, registers[rt] & 0xFFFF);     // Write 16 бит to memory
+        break;
+    case 0x28:                                      // sb (Store Byte)
+        write(address, registers[rt] & 0xFF);       // Write 8 bits to memory
+        break;
+    case 0x3F:                                      // sd (Store Doubleword) - approximate opcode
+        write(address, registers[rt]);              // Write 64 bits в память
+        break;
+    default:
+        std::cerr << "NOTHING HERE 0x : " << std::hex << instruction << std::endl; // for the message error
+        break;
+    }
 }
 
-// FOR THE HANDLE ARITHMETIC
-void olc_64::handleArithmetic(uint32_t instruction) {
-	uint8_t rs = (instruction >> 21) & 0x1F;	// Source 1
-	uint8_t rt = (instruction >> 16) & 0x1F;	// Source 2
-	uint8_t rd = (instruction >> 11) & 0x1F;	// Destination
-	uint8_t shamt = (instruction >> 6) & 0x1F;  // Shift (not used in most operations)
-	uint8_t funct = instruction & 0x3F;			// Function (defines a specific operation)
+void olc_64::handleSyscall() {
+    switch (registers[2]) { // Syscall number in $v0 ($2)
+    case 1: // Print integer
+        std::cout << registers[4] << std::endl;
+        break;
+    case 10: // Exit
+        std::exit(0);
+        break;
+    default:
+        std::cerr << "Unknown syscall: " << registers[2] << std::endl;
+        break;
+    }
+}
 
-	switch (funct) { // for the funct
-	case 0x18:       // MULTIPLY
-		registers[rs] = registers[rd] = registers[rs] * registers[rt];
-		break;
-	case 0x20:		 // ADD
-		registers[rs] = registers[rd] = registers[rs] + registers[rt];
-		break;
-	case 0x22:		 // SUB
-		registers[rd] = registers[rs] - registers[rt];
-		break;
-	case 0x24:		 // AND
-		registers[rd] = registers[rs] & registers[rt];
-		break;
-	case 0x25:		 // OR
-		registers[rd] = registers[rs] | registers[rt];
-		break;
-	case 0x2A:		 // SLT (Set Less Than)
-		registers[rd] = (registers[rs] < registers[rt]) ? 1 : 0;
-		break;
-	case 0x1A:		 // DIVIDE
-		registers[rd] = registers[rs] / registers[rt];
-		break;
-	default:
-		std::cerr << "Unknow the arithmetic: " << std::hex << instruction << std::endl;
-		break;
-	}
+// SYSTEM WORK
+void olc_64::systemWork(uint32_t instructions) {
+    uint8_t opcode = (instructions >> 26) & 0x3F;           // OPCODE
+    uint8_t funct = instructions & 0x3F;                   // FUNCT
+    uint8_t rd = (instructions >> 11) & 0x1F;              // RD
+    uint8_t rt = (instructions >> 16) & 0x1F;              // RT
+    uint8_t rs = (instructions >> 21) & 0x1F;              // RS
+
+    switch (funct) {
+    case 0x0C: // SYSCALL
+        handleSyscall();
+        break;
+    case 0x0D: // BREAK
+        std::cerr << "BREAK instruction encountered at PC = 0x" << std::hex << pc << std::endl;
+        // В реальном эмуляторе здесь можно перейти в режим отладки
+        break;
+    case 0x18: // ERET (Exception Return)
+        pc = coprocessor0[31]; // Предположим, что EPC хранится в регистре 31 сопроцессора 0
+        break;
+    case 0x00: // MFC0 (Move from Coprocessor 0)
+        if (rd < 32) {
+            registers[rt] = coprocessor0[rd];
+        }
+        else {
+            throw std::runtime_error("Invalid coprocessor 0 register");
+        }
+        break;
+    case 0x04: // MTC0 (Move to Coprocessor 0)
+        if (rd < 32) {
+            coprocessor0[rd] = registers[rt];
+        }
+        else {
+            throw std::runtime_error("Invalid coprocessor 0 register");
+        }
+        break;
+    default:
+        std::cerr << "Unknown system instruction: 0x" << std::hex << instructions << std::endl;
+        break;
+    }
+}
+
+// Обработка R-тип инструкций
+void olc_64::handleInstruction_of_R(uint32_t instructions) {
+    uint8_t rs = (instructions >> 21) & 0x1F;
+    uint8_t rt = (instructions >> 16) & 0x1F;
+    uint8_t rd = (instructions >> 11) & 0x1F;
+    uint8_t shamt = (instructions >> 6) & 0x1F;
+    uint8_t funct = instructions & 0x3F;
+
+    switch (funct) {
+    case 0x20: // ADD
+        registers[rd] = registers[rs] + registers[rt];
+        break;
+    case 0x21: // ADDU
+        registers[rd] = static_cast<uint64_t>(registers[rs]) + static_cast<uint64_t>(registers[rt]);
+        break;
+    case 0x22: // SUB
+        registers[rd] = registers[rs] - registers[rt];
+        break;
+    case 0x23: // SUBU
+        registers[rd] = static_cast<uint64_t>(registers[rs]) - static_cast<uint64_t>(registers[rt]);
+        break;
+    case 0x18: // MULT
+    {
+        int64_t result = static_cast<int64_t>(registers[rs]) * static_cast<int64_t>(registers[rt]);
+        hi = (result >> 32) & 0xFFFFFFFF;
+        lo = result & 0xFFFFFFFF;
+        break;
+    }
+    case 0x19: // MULTU
+    {
+        uint64_t result = static_cast<uint64_t>(registers[rs]) * static_cast<uint64_t>(registers[rt]);
+        hi = (result >> 32) & 0xFFFFFFFF;
+        lo = result & 0xFFFFFFFF;
+        break;
+    }
+    case 0x1A: // DIV
+        if (registers[rt] != 0) {
+            lo = static_cast<int64_t>(registers[rs]) / static_cast<int64_t>(registers[rt]);
+            hi = static_cast<int64_t>(registers[rs]) % static_cast<int64_t>(registers[rt]);
+        }
+        break;
+    case 0x1B: // DIVU
+        if (registers[rt] != 0) {
+            lo = static_cast<uint64_t>(registers[rs]) / static_cast<uint64_t>(registers[rt]);
+            hi = static_cast<uint64_t>(registers[rs]) % static_cast<uint64_t>(registers[rt]);
+        }
+        break;
+    case 0x24: // AND
+        registers[rd] = registers[rs] & registers[rt];
+        break;
+    case 0x25: // OR
+        registers[rd] = registers[rs] | registers[rt];
+        break;
+    case 0x26: // XOR
+        registers[rd] = registers[rs] ^ registers[rt];
+        break;
+    case 0x27: // NOR
+        registers[rd] = ~(registers[rs] | registers[rt]);
+        break;
+    case 0x2A: // SLT
+        registers[rd] = (static_cast<int64_t>(registers[rs]) < static_cast<int64_t>(registers[rt])) ? 1 : 0;
+        break;
+    case 0x2B: // SLTU
+        registers[rd] = (static_cast<uint64_t>(registers[rs]) < static_cast<uint64_t>(registers[rt])) ? 1 : 0;
+        break;
+    case 0x00: // SLL
+        registers[rd] = registers[rt] << shamt;
+        break;
+    case 0x02: // SRL
+        registers[rd] = static_cast<uint64_t>(registers[rt]) >> shamt;
+        break;
+    case 0x03: // SRA
+        registers[rd] = static_cast<int64_t>(registers[rt]) >> shamt;
+        break;
+    default:
+        std::cerr << "Unknown R-type instruction: " << std::hex << instructions << std::endl;
+        break;
+    }
+}
+
+// Обработка I-тип инструкций
+void olc_64::handleInstruction_of_I(uint32_t instruction) {
+    uint8_t opcode = (instruction >> 26) & 0x3F;
+    uint8_t rs = (instruction >> 21) & 0x1F;
+    uint8_t rt = (instruction >> 16) & 0x1F;
+    int16_t offset = instruction & 0xFFFF;
+    int64_t signed_offset = static_cast<int64_t>(offset);
+
+    switch (opcode) {
+    case 0x04: // BEQ
+        if (registers[rs] == registers[rt]) {
+            pc += signed_offset;
+        }
+        break;
+    case 0x05: // BNE
+        if (registers[rs] != registers[rt]) {
+            pc += signed_offset;
+        }
+        break;
+    case 0x06: // BLEZ
+        if (registers[rs] <= 0) {
+            pc += signed_offset;
+        }
+        break;
+    case 0x07: // BGTZ
+        if (registers[rs] > 0) {
+            pc += signed_offset;
+        }
+        break;
+    case 0x08: // ADDI
+        registers[rt] = registers[rs] + offset;
+        break;
+    case 0x09: // ADDIU
+        registers[rt] = static_cast<uint64_t>(registers[rs]) + static_cast<uint64_t>(offset);
+        break;
+    case 0x0C: // ANDI
+        registers[rt] = registers[rs] & static_cast<uint64_t>(offset);
+        break;
+    case 0x0D: // ORI
+        registers[rt] = registers[rs] | static_cast<uint64_t>(offset);
+        break;
+    case 0x0E: // XORI
+        registers[rt] = registers[rs] ^ static_cast<uint64_t>(offset);
+        break;
+    case 0x0F: // LUI
+        registers[rt] = static_cast<uint64_t>(offset) << 16;
+        break;
+    default:
+        std::cerr << "Unknown I-type instruction: " << std::hex << instruction << std::endl;
+        break;
+    }
+}
+
+// FOR THE J - INSTRUCTIONS
+void olc_64::handleInstruction_of_J(uint32_t instruction) {
+    uint8_t opcode = (instruction >> 26) & 0x3F; // 26 - bites for opcode
+    uint32_t address = instruction & 0x03FFFFFF;  // Allocating a 26-bit address
+
+    // MIPS64 for J - INSTRUCTIONS
+    uint64_t jumpAddress = (pc & 0xFFFFFFFFF0000000) | (address << 2);
+
+    switch (opcode) {
+    case 0x02:                  // JUMP(J)
+        pc = jumpAddress;       // assign the jump adress
+        break;
+    case 0x03:                  // JUMP AND LINK(JAL)
+        registers[31] = pc;     // THE SAVE THIS ADDRESS RETURN
+        pc = jumpAddress;       // assign the jump adress
+        break;
+    default:
+        std::cerr <<"NOTHING HERE 0x : " << std::hex << instruction << std::endl;
+        break;
+    }
+
 }
 
 // FOR THE OLC EXECUTE INSTRUCTION
 void olc_64::executeInstruction(uint32_t instruction) {
-	uint8_t opcode = (instruction >> 26) & 0x3F; // 
+	uint8_t opcode = (instruction >> 26) & 0x3F; // we declare opcode, when mask for extracting specific bits from an instruction
 
-	switch (opcode) {
-	case 0x00: // Opcode extraction(first 6 bits)
-		handleArithmetic(instruction);
-		break;
-	case 0x04: // BEQ
-	case 0x05:
-		handleInstruction(instruction); // Handle branches
-		break;
-	default:
-		std::cerr << "This is unknow instruction: " << std::hex << instruction << std::endl;
-		break;
-	}
+    if (opcode == 0x00) {
+        handleInstruction_of_R(instruction); // R - instructions
+    }
+    else if (opcode == 0x02 || opcode == 0x03) {
+        handleInstruction_of_J(instruction); // J(JUMP) or JUMP AND LINK
+    }
+    else {
+        handleInstruction_of_I(instruction); // I - instructions
+    }
 }
+
+
