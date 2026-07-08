@@ -1,1 +1,8 @@
-*.vs
+agents
+.vs/
+build
+build.exe
+bin/
+obj/
+out/
+CMakeUserPresets.json
