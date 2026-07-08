@@ -4,3 +4,4 @@ An attempt to implement the legendary MIPS64 emulator. My current main goal is t
   
 |   Platform   |    Compiler   |   Architecture   |
 | ------------ | ------------- | ---------------- |
+| Windows 10(x32+x64)
