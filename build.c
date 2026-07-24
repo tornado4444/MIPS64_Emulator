@@ -94,7 +94,7 @@ typedef enum BuildLogLevel {
     BUILD_LOG_NONE
 } BuildLogLevel;
 
-typedef struct BuildConfig {
+typedef enum BuildConfig {
     Compiler compiler;
     BuildMode mode;
 
@@ -431,12 +431,9 @@ static void init_config(BuildConfig* config, Compiler compiler, BuildMode mode) 
 
 static void build_project(const BuildConfig* config) {
     static const char* sources[] = {
-        /*
+        /* TODO
             This is the minimal entry point for the project right now.
-            Add future emulator modules here when they exist, for example:
-
-                "src/core/cpu.c",
-                "src/core/memory.c",
+            Add future emulator modules here when they exist:
         */
         "src/mips64/core.c",
         "src/main.c",

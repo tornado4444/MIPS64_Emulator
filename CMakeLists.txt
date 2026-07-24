@@ -61,8 +61,7 @@ else()
 endif()
 
 add_library(mips64_core STATIC
-    ${MIPS64_CORE_SOURCES}
-)
+    ${MIPS64_CORE_SOURCES})
 target_link_libraries(mips64_core
     PUBLIC
         mips64_project_options
@@ -72,8 +71,7 @@ target_link_libraries(mips64_core
 
 if(MIPS64_BUILD_CLI)
     add_executable(mips64_emu
-        ${MIPS64_CLI_SOURCES}
-    )
+        ${MIPS64_CLI_SOURCES})
     target_link_libraries(mips64_emu
         PRIVATE
             mips64_core
