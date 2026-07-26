@@ -452,23 +452,112 @@ Mips64Status mips64_read_memory(
 Mips64Status mips64_write_memory(
 	Mips64Emulator* emulator, 
 	uint64_t guest_address,
-	const void* out_data, 
+	const void* data, 
 	size_t size
 ) {
 	if (emulator == NULL) {
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
+
+	if (size != 0u && data == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+
+	if (!mips64_memory_range_is_valid(emulator, guest_address, size)) {
+		return MIPS64_STATUS_ADDRESS_OUT_OF_RANGE;
+	}
+
+	if (size != 0u) {
+		memcpy(emulator->memory + (size_t)guest_address, data, size);
+	}
+
+	return MIPS64_STATUS_OK;
 }
 
 // DIAGNOSTIC 
 const char* mips64_status_string(
 	Mips64Status status
-);
+) {
+	switch (status) {
+		case MIPS64_STATUS_OK:
+			return "ok";
+		case MIPS64_STATUS_INTERNAL_ERROR:
+			return "internal error";
+		case MIPS64_STATUS_INVALID_ARGUMENT:
+			return "invalid argument";
+		case MIPS64_STATUS_INVALID_REGISTER:
+			return "invalid register";
+		case MIPS64_STATUS_OUT_OF_MEMORY:
+			return "out of memory";
+		case MIPS64_STATUS_ADDRESS_OUT_OF_RANGE:
+			return "address out of range";
+		case MIPS64_STATUS_UNALIGNED_PC:
+			return "unaligned program counter";
+
+		case MIPS64_STATUS_STEP_LIMIT_REACHED:
+			return "step limit reached";
+
+		case MIPS64_STATUS_NOT_IMPLEMENTED:
+			return "not implemented";
+		default:
+			return "invalid or incorrect status";
+	}
+}
 
 Mips64Status mips64_debug_dump(
 	const Mips64Emulator* emulator, 
-	Mips64DebugWriteFn write_fn, 
+	Mips64DebugWriteFn write_fn,
 	void* user_data
 ) {
+	char line[128];
+	uint32_t index;
+	uint64_t value;
+	int written;
 
+	if (emulator == NULL || write_fn == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+
+	/*
+		* May not use %llu for uint64_t and assume that
+		* it's portable.
+		*
+		* For uint64_t, the standard provides PRIx64,
+		* PRIu64, and other macros from inttypes.h.
+	*/
+	written = snprinf(line, sizeof(line), "%s %s \n", 
+		"PC = 0x%016" PRIx16 "\n", 
+		mips64_core_name(), 
+		mips64_core_version_string(), 
+		emulator->pc);
+
+	if (written < 0 || (size_t)written >= sizeof(line)) {
+		return MIPS64_STATUS_INTERNAL_ERROR;
+	}
+
+	write_fn(user_data, line, (size_t)written);
+
+	for (int i = 0u; i < MIPS64_GPR_COUNT; ++i) {
+		if (index == 0u) {
+			value = UINT64_C(0);
+		}
+		else {
+			value = emulator->gpr[index];
+		}
+
+		written = snprintf(
+			line,
+			sizeof(line),
+			"r%02" PRIu32 " = 0x%016" PRIx64 "\n",
+			index,
+			value
+		);
+
+		if (written = 0 || (size_t)written >= sizeof(line)) {
+			return MIPS64_STATUS_INTERNAL_ERROR;
+		}
+
+		write_fn(user_data, line, (size_t)written);
+	}
+	return MIPS64_STATUS_OK;
  }
