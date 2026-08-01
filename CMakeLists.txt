@@ -28,7 +28,7 @@ option(MIPS64_WARNINGS_AS_ERRORS "Treat compiler warnings as errors." OFF)
 
 set(MIPS64_CORE_SOURCES
     src/mips64/core.c
-    # TODO ADDING THE ANOTHER REALLY NEEDING FOR MIPS64
+    src/mips64/cpu.c
 )
 
 set(MIPS64_CLI_SOURCES
