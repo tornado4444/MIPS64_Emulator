@@ -2,11 +2,26 @@
 
 #include "mips64/core.h"
 
-// RELEASE THE CPU	
-typedef struct CPU {
-	int bit; 
-	int8_t byte; // 8 bit, B
-	int16_t halfword; // 16 bits, H
-	int32_t Word; // 32 bits, W
-	int64_t DoubleWord; // 64 bits, D
-};
+// RELEASE THE CPU MIPS64	
+typedef struct Mips64CPU {
+	uint64_t gpr[MIPS64_GPR_COUNT];
+
+	uint64_t pc; // Program Count register
+	/* TODO NEED BEEN RELEASE ON FUTURE FOR 
+	* uint64_t hi; // Multiply and Divide register higher result
+	* uint64_t lo; // Multiply and Divide register lower result
+	*/
+} Mips64CPU;
+
+void mips64_cpu_init(Mips64CPU* cpu, uint64_t reset_pc);
+void mips64_cpu_reset(Mips64CPU* cpu, uint64_t reset_pc);
+Mips64Status mips64_cpu_mips_get_gpr(const Mips64CPU* cpu, uint32_t index, uint64_t* out_value);
+Mips64Status mips64_cpu_set_gpr(Mips64CPU* cpu, uint32_t index, uint64_t value);
+Mips64Status mips64_cpu_get_pc(const Mips64CPU* cpu, uint64_t* out_pc);
+Mips64Status mips64_cpu_set_pc(Mips64CPU* cpu, uint64_t pc);
+
+
+
+
+
+
