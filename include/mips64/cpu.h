@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "mips64/core.h"
 
@@ -7,7 +7,7 @@ typedef struct Mips64CPU {
 	uint64_t gpr[MIPS64_GPR_COUNT];
 
 	uint64_t pc; // Program Count register
-	/* TODO NEED BEEN RELEASE ON FUTURE FOR 
+	/* TODO NEED BEEN RELEASE ON FUTURE FOR
 	* uint64_t hi; // Multiply and Divide register higher result
 	* uint64_t lo; // Multiply and Divide register lower result
 	*/
@@ -15,8 +15,8 @@ typedef struct Mips64CPU {
 
 // DECODING INSTRUCTIONS
 /* TODO
-	This is temporary, since it is just for testing, 
-	there are few instructions and in fact it will take a long time and be difficult to do at first, 
+	This is temporary, since it is just for testing,
+	there are few instructions and in fact it will take a long time and be difficult to do at first,
 	then I will change it. In general, this will need to be transferred to decode.c when it is available
 	- Ten instructions;
 	- Multiple formats;
@@ -52,7 +52,9 @@ Mips64Status mips64_cpu_set_pc(Mips64CPU* cpu, uint64_t pc);
 
 // RELEASE DECODE INSTRUCTION
 static void decode_instruction(uint32_t raw, Mips64Decoded* out_instruction);
+static uint64_t sign_extension(uint16_t value);
 
-
-
+static Mips64Status mips64_execute_nop(Mips64CPU* cpu, const Mips64Decoded* instruction); //  0x000000
+static Mips64Status mips64_execute_daddiu(Mips64CPU* cpu, const Mips64Decoded* instruction); // Operation: GPR[rd] <- GPR[rs] + GPR[rt];
+static Mips64Status mips64_execute_daddu(Mips64CPU* cpu, const Mips64Decoded* instruction); // Operation: GPR[rt]  GPR[rs] + sign_extend(immediate) 
 

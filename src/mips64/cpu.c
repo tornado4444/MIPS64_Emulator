@@ -8,7 +8,7 @@ void mips64_cpu_init(Mips64CPU* cpu, uint64_t reset_pc) {
 	}
 
 	memset(cpu, 0, sizeof(*cpu));
-	
+
 	cpu->pc = reset_pc;
 	cpu->gpr[0] = UINT64_C(0);
 }
@@ -97,4 +97,52 @@ void decode_instruction(uint32_t raw, Mips64Decoded* out_instruction) {
 	out_instruction->function = (uint8_t)(raw & UINT32_C(0x3F));
 	out_instruction->immediate = (uint16_t)(raw & UINT32_C(0xFFF));
 	out_instruction->target = raw & UINT32_C(0x03FFFFFFFF);
+}
+
+uint64_t sign_extension(uint16_t value) {
+	return (uint64_t)(uint64_t)(uint16_t)value;
+}
+
+Mips64Status mips64_execute_nop(Mips64CPU* cpu, const Mips64Decoded* instruction) {
+	if (instruction == UINT32_C(0)) {
+		cpu->pc += UINT64_C(4);
+		return MIPS64_STATUS_OK;
+	}
+}
+
+Mips64Status mips64_execute_daddiu(Mips64CPU* cpu, const Mips64Decoded* instruction) {
+	uint64_t source;
+	uint64_t immediate;
+	
+	uint64_t result;
+	
+	source = cpu->gpr[instruction->rs];
+
+	immediate = sign_extension(instruction->immediate);
+
+	result = source + immediate;
+
+	if (instruction->rt != 0u) {
+		cpu->gpr[instruction->rt] = result;
+	}
+
+	cpu->gpr[0] = UINT64_C(0);
+	cpu->pc += UINT64_C(4);
+
+	return MIPS64_STATUS_OK;
+}
+
+Mips64Status mips64_execute_daddu(Mips64CPU* cpu, const Mips64Decoded* instruction) {
+	uint64_t result;
+
+	result = cpu->gpr[instruction->rs] + cpu->gpr[instruction->rt];
+
+	if (instruction->rd != 0) {
+		cpu->gpr[instruction->rd] = result;
+	}
+	
+	cpu->gpr[0] = UINT64_C(0);
+	cpu->pc += UINT64_C(4);
+
+	return MIPS64_STATUS_OK;
 }
