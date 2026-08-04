@@ -1,4 +1,5 @@
 #include "mips64/core.h"
+#include "mips64/cpu.h"
 
 #include <inttypes.h>
 #include <stdio.h>
@@ -19,8 +20,7 @@ struct Mips64Emulator {
 	uint8_t* memory;
 
 	size_t memory_size;
-	uint64_t pc;
-	uint64_t gpr[MIPS64_GPR_COUNT];
+	Mips64CPU cpu; // in CPU we have gpr[MIPS64_GPR_COUNT] + pc
 };
 
 static int mips64_is_valid_endian(
@@ -209,9 +209,9 @@ Mips64Status mips64_create(
 
 	emulator->config = *config;
 	emulator->memory_size = config->memory_size;
-	emulator->pc = config->reset_pc;
+	emulator->cpu.pc = config->reset_pc;
 
-	emulator->gpr[0] = UINT64_C(0);
+	emulator->cpu.gpr[0] = UINT64_C(0);
 	*out_emulator = emulator;
 
 	return MIPS64_STATUS_OK;
@@ -240,9 +240,9 @@ Mips64Status mips64_get_pc(
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
 
-	memset(emulator->gpr, 0, sizeof(emulator->gpr));
+	memset(emulator->cpu.gpr, 0, sizeof(emulator->cpu.gpr));
 
-	emulator->pc = emulator->config.reset_pc;
+	emulator->config.reset_pc = emulator->config.reset_pc;
 
 	if (emulator->config.clear_memory_on_reset != 0) {
 		memset(emulator->memory, 0, emulator->memory_size);
@@ -308,14 +308,14 @@ Mips64Status mips64_step(
 	if (out_info != NULL) {
 		memset(out_info, 0, sizeof(*out_info));
 
-		out_info->pc_before = emulator->pc;
+		out_info->pc_before = emulator->cpu.pc;
 
-		out_info->pc_after = emulator->pc;
+		out_info->pc_after = emulator->cpu.pc;
 
 		out_info->stop_reason = MIPS64_STOP_REASON_NONE;
 	}
 
-	status = mips64_fetch_instruction(emulator, emulator->pc, &instruction);
+	status = mips64_fetch_instruction(emulator, emulator->cpu.pc, &instruction);
 
 	if (out_info != NULL) {
 		out_info->instruction = instruction;
@@ -350,7 +350,7 @@ Mips64Status mips64_run_program(
 	if (out_info != NULL) {
 		memset(out_info, 0, sizeof(*out_info));
 
-		out_info->final_pc = emulator->pc;
+		out_info->final_pc = emulator->cpu.pc;
 
 		out_info->stop_reason = MIPS64_STOP_REASON_NONE;
 
@@ -365,7 +365,7 @@ Mips64Status mips64_run_program(
 			if (out_info != NULL) {
 				out_info->steps_executed = step_index;
 
-				out_info->final_pc = emulator->pc;
+				out_info->final_pc = emulator->cpu.pc;
 
 				out_info->last_status = status;
 
@@ -381,7 +381,7 @@ Mips64Status mips64_run_program(
 			max_steps;
 
 		out_info->final_pc =
-			emulator->pc;
+			emulator->cpu.pc;
 
 		out_info->last_status =
 			MIPS64_STATUS_STEP_LIMIT_REACHED;
@@ -401,7 +401,7 @@ Mips64Status mips64_get_pc(
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
 
-	void(*out_pc) = emulator->pc;
+	void(*out_pc) = emulator->cpu.pc;
 
 	return MIPS64_STATUS_OK;
 }
@@ -414,7 +414,7 @@ Mips64Status mips64_set_pc(
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
 
-	void(*set_pc) = emulator->pc;
+	void(*set_pc) = emulator->cpu.pc;
 
 	return MIPS64_STATUS_OK;
 }
@@ -529,7 +529,7 @@ Mips64Status mips64_debug_dump(
 		"PC = 0x%016" PRIx16 "\n",
 		mips64_core_name(),
 		mips64_core_version_string(),
-		emulator->pc);
+		emulator->cpu.pc);
 
 	if (written < 0 || (size_t)written >= sizeof(line)) {
 		return MIPS64_STATUS_INTERNAL_ERROR;
@@ -542,7 +542,7 @@ Mips64Status mips64_debug_dump(
 			value = UINT64_C(0);
 		}
 		else {
-			value = emulator->gpr[index];
+			value = emulator->cpu.gpr[index];
 		}
 
 		written = snprintf(

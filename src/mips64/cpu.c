@@ -86,6 +86,7 @@ Mips64Status mips64_cpu_set_pc(Mips64CPU* cpu, uint64_t pc) {
 	return MIPS64_STATUS_OK;
 }
 
+
 void decode_instruction(uint32_t raw, Mips64Decoded* out_instruction) {
 	out_instruction->raw = raw;
 
@@ -101,6 +102,46 @@ void decode_instruction(uint32_t raw, Mips64Decoded* out_instruction) {
 
 uint64_t sign_extension(uint16_t value) {
 	return (uint64_t)(uint64_t)(uint16_t)value;
+}
+
+Mips64Status mips64_cpu_execute(Mips64CPU* cpu, uint32_t raw_instruction) {
+	Mips64Decoded instruction;
+
+	if (cpu == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+
+	decode_instruction(raw_instruction, &raw_instruction);
+
+	if (raw_instruction == UINT32_C(0)) {
+		cpu->pc += UINT64_C(4);
+		return MIPS64_STATUS_OK;
+	}
+
+	switch (instruction.opcode) {
+	case MIPS64_OPCODE_SPECIAL:
+		return mips64_execute_special(cpu, &instruction);
+	case MIPS64_OPCODE_DADDIU:
+		return mips64_execute_special(cpu, &instruction);
+	default:
+		printf("Error or incorrect opcode: ", instruction.opcode);
+		return MIPS64_STATUS_NOT_IMPLEMENTED;
+	}
+	return MIPS64_STATUS_OK;
+}
+
+Mips64Status mips64_execute_special(Mips64CPU* cpu, const Mips64Decoded* instruction) {
+	if (cpu == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+	
+	switch (instruction->function) {
+	case MIPS64_OPCODE_DADDU:
+		return mips64_execute_special(cpu, &instruction);
+	default:
+		printf("Error or incorrect opcode: ", instruction->function);
+		return MIPS64_STATUS_NOT_IMPLEMENTED;
+	}
 }
 
 Mips64Status mips64_execute_nop(Mips64CPU* cpu, const Mips64Decoded* instruction) {

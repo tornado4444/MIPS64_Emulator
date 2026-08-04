@@ -43,6 +43,24 @@ typedef struct Mips64Decoded {
 	uint32_t target;
 } Mips64Decoded;
 
+typedef enum Mips64Opcode {
+	/* TODO
+		* It's a base opcodes instructions, in future need add more:
+		* - ADD 
+		* - ADDU
+		* - ORI
+		* - ANDI
+		* - XORI
+		* - LUI
+		* - DSUBU
+		* - SLT
+		* - SLTU
+	*/
+	MIPS64_OPCODE_SPECIAL,
+	MIPS64_OPCODE_DADDIU,
+	MIPS64_OPCODE_DADDU
+} Mips64Opcode;
+
 void mips64_cpu_init(Mips64CPU* cpu, uint64_t reset_pc);
 void mips64_cpu_reset(Mips64CPU* cpu, uint64_t reset_pc);
 Mips64Status mips64_cpu_mips_get_gpr(const Mips64CPU* cpu, uint32_t index, uint64_t* out_value);
@@ -54,6 +72,7 @@ Mips64Status mips64_cpu_set_pc(Mips64CPU* cpu, uint64_t pc);
 static void decode_instruction(uint32_t raw, Mips64Decoded* out_instruction);
 static uint64_t sign_extension(uint16_t value);
 
+Mips64Status mips64_cpu_execute(Mips64CPU* cpu, uint64_t raw_instruction);
 static Mips64Status mips64_execute_nop(Mips64CPU* cpu, const Mips64Decoded* instruction); //  0x000000
 static Mips64Status mips64_execute_daddiu(Mips64CPU* cpu, const Mips64Decoded* instruction); // Operation: GPR[rd] <- GPR[rs] + GPR[rt];
 static Mips64Status mips64_execute_daddu(Mips64CPU* cpu, const Mips64Decoded* instruction); // Operation: GPR[rt]  GPR[rs] + sign_extend(immediate) 
