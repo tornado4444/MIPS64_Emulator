@@ -232,25 +232,6 @@ void mips64_destroy(
 	free(emulator);
 }
 
-Mips64Status mips64_get_pc(
-	Mips64Emulator* emulator,
-	uint64_t out_pc
-) {
-	if (emulator == NULL) {
-		return MIPS64_STATUS_INVALID_ARGUMENT;
-	}
-
-	memset(emulator->cpu.gpr, 0, sizeof(emulator->cpu.gpr));
-
-	emulator->config.reset_pc = emulator->config.reset_pc;
-
-	if (emulator->config.clear_memory_on_reset != 0) {
-		memset(emulator->memory, 0, emulator->memory_size);
-	}
-
-	return MIPS64_STATUS_OK;
-}
-
 // LOADING PROGRAM
 Mips64Status mips64_load_program(
 	Mips64Emulator* emulator,
@@ -401,20 +382,20 @@ Mips64Status mips64_get_pc(
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
 
-	void(*out_pc) = emulator->cpu.pc;
+	out_pc = emulator->cpu.pc;
 
 	return MIPS64_STATUS_OK;
 }
 
 Mips64Status mips64_set_pc(
-	Mips64Emulator* emulator,
-	uint64_t set_pc
+	Mips64Emulator* emulator, 
+	uint64_t set_pc 
 ) {
 	if (emulator == NULL || set_pc == NULL) {
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
 
-	void(*set_pc) = emulator->cpu.pc;
+	set_pc = emulator->cpu.pc;
 
 	return MIPS64_STATUS_OK;
 }
