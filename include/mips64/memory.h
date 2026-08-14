@@ -44,8 +44,8 @@ uint32_t mips64_32bit_read(Memory* mem, uint64_t address); // Word = 32 bit
 uint64_t mips64_64bit_read(Memory* mem, uint64_t address); // Doubleword = 64 bit
 
 // For write
-uint8_t mips64_8bit_write(Memory* mem, uint64_t address);
-uint16_t mips64_16bit_write(Memory* mem, uint64_t address);
-uint32_t mips64_32bit_write(Memory* mem, uint64_t address);
-uint64_t mips64_64bit_write(Memory* mem, uint64_t address);
+uint8_t mips64_8bit_write(Memory* mem, uint64_t address, uint8_t value);
+uint16_t mips64_16bit_write(Memory* mem, uint64_t address, uint8_t value);
+uint32_t mips64_32bit_write(Memory* mem, uint64_t address, uint8_t value);
+uint64_t mips64_64bit_write(Memory* mem, uint64_t address, uint8_t value);
 

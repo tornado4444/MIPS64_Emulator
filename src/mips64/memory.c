@@ -53,18 +53,28 @@ uint64_t mips64_64bit_read(Memory* mem, uint64_t address) {
 }
 
 // For write
-uint8_t mips64_8bit_write() {
-	
+uint8_t mips64_8bit_write(Memory* mem, uint64_t address, uint8_t value) {
+	if(!validAddress(address, 1)) return 0;
+	mem->memory[address] = value
 }
 
-uint16_t mips64_16bit_write() {
-	
+uint16_t mips64_16bit_write(Memory* mem, uint64_t address, uint8_t value) {
+	if(!validAddress(address, 2)) return 0;
+	mem->memory[address] = value & 0xFF;
+	mem->memory[address + 1] = (value >> 8) & 0xFF;
 }
 
 uint32_t mips64_32bit_write() {
-	
+	if(!validAddress(address, 4)) return 0;
+	mem->memory[address] = value & 0xFF;
+	mem->memory[address + 1] = (value >> 8) & 0xFF;
+	mem->memory[address + 2] = (value >> 16) & 0xFF;
+	mem->memory[address + 3] = (value >> 24) & 0xFF;
 }
 
 uint64_t mips64_64bit_write() {
-	
+	if(!validAddress(address, 8)) return 0;
+	for(int i = 0; i < 8; i++) {
+		mem->memory[address+i] = (value >> (i * 8)) & 0xFF;
+	}
 }
