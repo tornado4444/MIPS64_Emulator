@@ -8,8 +8,8 @@ typedef struct Mips64CPU {
 
 	uint64_t pc; // Program Count register
 	/* TODO NEED BEEN RELEASE ON FUTURE FOR
-	* uint64_t hi; // Multiply and Divide register higher result
-	* uint64_t lo; // Multiply and Divide register lower result
+	* uint64_t hi; // Multiply and Divide register higher result(Removed in Release 6, I'll implement it anyway because I'll be making several releases, including Release 2.)
+	* uint64_t lo; // Multiply and Divide register lower result(Removed in Release 6, but I need I'll implement it anyway because I'll be making several releases, including Release 2.)
 	*/
 } Mips64CPU;
 
@@ -24,7 +24,7 @@ typedef struct Mips64CPU {
 	- Disassembler;
 	- Decoder tests separate from the CPU;
 	- Different ISA versions;
-	- MIPS64 Release 2 and Release 6;
+	- MIPS64 Release 2 and Release 6 + other Releases;
 	- microMIPS;
 	Separate representation of the decoded instruction.
 	In addition, we must not forget that coprocessors are not implemented, so there is simply no point in adding the possibility now.
