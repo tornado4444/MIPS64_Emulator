@@ -7,9 +7,8 @@
 #define BLOCK_SIZE 16u
 
 /* TODO FOR MEMORY
-*	1) LoadMemory, StoreMemory();
-*	2) Little-Endian, Big-Endian;(BigEndianMem)
-*	3) In future release MMU
+*	1) Little-Endian, Big-Endian;(BigEndianMem)
+*	2) In future release MMU
 */
 
 // FOR MEMORY ~64 MB
@@ -21,6 +20,17 @@ typedef struct Memory {
 // Checking for out of bounds
 bool validAddress(uint64_t address, uint64_t size) {
 	return (address + size <= MAX_SIZE);
+}
+
+// Bounds checking
+bool mips64_bounds_checking(uint64_t address, uint64_t data_size) {
+	if(data_size == 0) return false;
+
+	if(address > UINT64_MAX - data_size) return false;
+
+	if(address + data_size > MAX_SIZE) return false;
+
+    	return true;
 }
 
 /* TODO
