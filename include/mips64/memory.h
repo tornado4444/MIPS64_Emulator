@@ -16,22 +16,12 @@ typedef struct Memory {
 	uint8_t memory[MAX_SIZE];
 } Memory;
 
+typedef enum Mips64Exception{
+	MIPS_EXCEPTION_NONE = 0,
+	MIPS_EXCEPTION_ADEL, // Address error on Load
+	MIPS_EXCEPTION_ADES  // Address error on Store
+} Mips64Exception;
 
-// Checking for out of bounds
-bool validAddress(uint64_t address, uint64_t size) {
-	return (address + size <= MAX_SIZE);
-}
-
-// Bounds checking
-bool mips64_bounds_checking(uint64_t address, uint64_t data_size) {
-	if(data_size == 0) return false;
-
-	if(address > UINT64_MAX - data_size) return false;
-
-	if(address + data_size > MAX_SIZE) return false;
-
-    	return true;
-}
 
 /* TODO
  * 
