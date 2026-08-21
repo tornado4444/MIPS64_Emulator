@@ -49,14 +49,14 @@ Mips64MemoryStatus mips64_memory_init(Memory* mem, Mips64Endian endian);
 Mips64MemoryStatus mips64_memory_reset(Memory* mem);
 
 // --READ--
-Mips64MemoryStatus mips64_memory_read8(const Memory* mem, uint64_t address, uint8_t out_value);  // Read Byte = 8 bit
-Mips64MemoryStatus mips64_memory_read16(const Memory* mem, uint64_t address, uint16_t out_value); // Read Halfword = 16 bit
-Mips64MemoryStatus mips64_memory_read32(const Memory* mem, uint64_t address, uint32_t out_value); // Read Word = 32 bit
-Mips64MemoryStatus mips64_memory_read64(const Memory* mem, uint64_t address, uint64_t out_value); // Read Doubleword = 64 bit
+Mips64MemoryStatus mips64_memory_read8(const Memory* mem, uint64_t address, uint8_t* out_value);    // Read Byte = 8 bit
+Mips64MemoryStatus mips64_memory_read16(const Memory* mem, uint64_t address, uint16_t* out_value);  // Read Halfword = 16 bit
+Mips64MemoryStatus mips64_memory_read32(const Memory* mem, uint64_t address, uint32_t* out_value);  // Read Word = 32 bit
+Mips64MemoryStatus mips64_memory_read64(const Memory* mem, uint64_t address, uint64_t* out_value);  // Read Doubleword = 64 bit
 
 // --WRITE--
-Mips64MemoryStatus mips64_memory_write8(const Memory* mem, uint64_t address, uint8_t out_value);  // Write Byte = 8 bit
-Mips64MemoryStatus mips64_memory_write16(const Memory* mem, uint64_t address, uint8_t out_value); // Write Halfword = 16 bit
-Mips64MemoryStatus mips64_memory_write32(const Memory* mem, uint64_t address, uint8_t out_value); // Write Word = 32 bit
-Mips64MemoryStatus mips64_memory_write64(const Memory* mem, uint64_t address, uint8_t out_value); // Write Doubleword = 64 bit
+Mips64MemoryStatus mips64_memory_write8(const Memory* mem, uint64_t address, uint8_t* out_value);   // Write Byte = 8 bit
+Mips64MemoryStatus mips64_memory_write16(const Memory* mem, uint64_t address, uint16_t* out_value); // Write Halfword = 16 bit
+Mips64MemoryStatus mips64_memory_write32(const Memory* mem, uint64_t address, uint32_t* out_value); // Write Word = 32 bit
+Mips64MemoryStatus mips64_memory_write64(const Memory* mem, uint64_t address, uint64_t* out_value); // Write Doubleword = 64 bit
 

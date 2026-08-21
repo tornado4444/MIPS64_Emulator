@@ -1,7 +1,7 @@
 #include "mips64/memory.h"
 
 // Bounds checking
-bool mips64_bounds_checking(uint64_t address, uint64_t data_size) {
+static bool mips64_bounds_checking(uint64_t address, uint64_t data_size) {
 	if(data_size == 0) return false;
 
 	if(address > UINT64_MAX - data_size) return false;
@@ -12,7 +12,7 @@ bool mips64_bounds_checking(uint64_t address, uint64_t data_size) {
 }
 
 // Alignment checking
-bool mips64_alignment_checking(uint64_t address, uint64_t data_size) {
+static bool mips64_alignment_checking(uint64_t address, uint64_t data_size) {
 	/*
 	 * Mask of the least significant bits:
 	 * - for 2 bytes: mask 1(01b);
@@ -23,36 +23,41 @@ bool mips64_alignment_checking(uint64_t address, uint64_t data_size) {
 		case 1:
 			return true;
 		case 2:
-			return (address & 0x1u) == 0;
+			return (address & UINT64_C(0x1)) == 0;
 		case 4:
-			return (address & 0x3u) == 0;
+			return (address & UINT64_C(0x3)) == 0;
 		case 8:
-			return (address & 0x7u) == 0;
+			return (address & UINT64_C(0x7)) == 0;
 		default:
 			return false;
 	}
 }
 
-void mips64_memory_init(Memory* mem) {
+Mips64MemoryStatus mips64_memory_init(Memory* mem, Mips64Endian endian) {
 	if(mem == NULL) {
 		printf("Error to init memory");
-		return;
+		return MIPS64_MEMORY_NULL_POINTER;
 	}
 
-	memset(mem, 0, sizeof(*mem));
+	memset(mem->memory, 0, sizeof(*mem));
+	return MIPS64_MEMORY_OK;
 }
 
-void mips64_memory_reset(Memory* mem) {
+Mips64MemoryStatus mips64_memory_reset(Memory* mem) {
 	if(mem == NULL) {
 		printf("Error to reset memory");
-		return;
+		return MIPS64_MEMORY_NULL_POINTER;
 	}
-
-	memset(mem, 0, sizeof(*mem));
+	/*
+	 * Reset RAM but preserve configuration.
+	 * Including current endian mode.
+	 * */
+	memset(mem->memory, 0, sizeof(*mem));
+	return MIPS64_MEMORY_OK;
 }
 
 // For read
-uint8_t mips64_8bit_read(Memory* mem, Checking* cpu, uint64_t address) { 
+Mips64MemoryStatus mips64_memory_read8(const Memory* mem, uint64_t address, uint8_t* out_value) {  
 	if(!mips64_bounds_checking(address, 1)) {
 		fprinf(stderr, "Error: Out of bounds memory! Reading 1 byte at address 0x%016llX\n", address);
 		return 0;
@@ -60,7 +65,7 @@ uint8_t mips64_8bit_read(Memory* mem, Checking* cpu, uint64_t address) {
 	return mem->memory[address];
 }
 
-uint16_t mips64_16bit_read(Memory* mem, uint64_t address) {
+Mips64MemoryStatus mips64_memory_read16(const Memory* mem, uint64_t address, uint16_t* out_value) {
 	if(!mips64_bounds_checking(address, 2)) {
 		fprinf(stderr, "Error: Out of bounds memory! Reading 2 bytes at address 0x%016llX\n", address);
 		return 0;
@@ -69,7 +74,7 @@ uint16_t mips64_16bit_read(Memory* mem, uint64_t address) {
 		((uint16_t) mem->memory[address + 1] << 8);
 }
 
-uint32_t mips64_32bit_read(Memory* mem, uint64_t address) {
+Mips64MemoryStatus mips64_memory_read32(const Memory* mem, uint64_t address, uint32_t* out_value){
 	if(!mips64_bounds_checking(address, 4)) {
 		fprinf(stderr, "Error: Out of bounds memory! Reading 4 bytes at address 0x%016llX\n", address);
 		return 0;
@@ -80,7 +85,7 @@ uint32_t mips64_32bit_read(Memory* mem, uint64_t address) {
 		((uint32_t) mem->memory[address + 3] << 24);
 }
 
-uint64_t mips64_64bit_read(Memory* mem, uint64_t address) {
+Mips64MemoryStatus mips64_memory_read64(const Memory* mem, uint64_t address, uint64_t* out_value){
 	if(!mips64_bounds_checking(address, 8)) {
 		fprinf(stderr, "Error: Out of bounds memory! Reading 8 bytes at address 0x%016llX\n", address);
 		return 0;
@@ -94,7 +99,7 @@ uint64_t mips64_64bit_read(Memory* mem, uint64_t address) {
 }
 
 // For write
-uint8_t mips64_8bit_write(Memory* mem, uint64_t address, uint8_t value) {
+Mips64MemoryStatus mips64_memory_write8(const Memory* mem, uint64_t address, uint8_t* out_value) {
 	if(!mips64_bounds_checking(address, 1)) {
 		fprinf(stderr, "Error: Out of bounds memory! Writing 1 byte at address 0x%016llX\n", address);
 		return 0;
@@ -102,7 +107,7 @@ uint8_t mips64_8bit_write(Memory* mem, uint64_t address, uint8_t value) {
 	mem->memory[address] = value
 }
 
-uint16_t mips64_16bit_write(Memory* mem, uint64_t address, uint8_t value) {
+Mips64MemoryStatus mips64_memory_write16(const Memory* mem, uint64_t address, uint16_t* out_value){
 	if(!mips64_bounds_checking(address, 2)) {
 		fprinf(stderr, "Error: Out of bounds memory! Writing 2 bytes at address 0x%016llX\n", address);
 		return 0;
@@ -111,7 +116,7 @@ uint16_t mips64_16bit_write(Memory* mem, uint64_t address, uint8_t value) {
 	mem->memory[address + 1] = (value >> 8) & 0xFF;
 }
 
-uint32_t mips64_32bit_write() {
+Mips64MemoryStatus mips64_memory_write32(const Memory* mem, uint64_t address, uint32_t* out_value){
 	if(!mips64_bounds_checking(address, 4)) {
 		fprinf(stderr, "Error: Out of bounds memory! Writing 4 bytes at address 0x%016llX\n", address);
 		return 0;
@@ -122,7 +127,7 @@ uint32_t mips64_32bit_write() {
 	mem->memory[address + 3] = (value >> 24) & 0xFF;
 }
 
-uint64_t mips64_64bit_write() {
+Mips64MemoryStatus mips64_memory_write64(const Memory* mem, uint64_t address, uint64_t* out_value) {
 	if(!mips64_bounds_checking(address, 8)) {
 		fprinf(stderr, "Error: Out of bounds memory! Writing 8 bytes at address 0x%016llX\n", address);
 		return 0;
