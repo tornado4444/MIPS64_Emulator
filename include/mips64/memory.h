@@ -1,51 +1,62 @@
 #pragma once
 
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #include "mips64/core.h"
 
 // memory_size = 64 * 1024 * 1024
 #define MAX_SIZE (64u * 1024u * 1024u)
-#define BLOCK_SIZE 16u
 
-/* TODO FOR MEMORY
-*	1) Little-Endian, Big-Endian;(BigEndianMem)
-*	2) In future release MMU
-*/
+/* TODO
+ * Base memory implementation:
+ * - Memory storage
+ * - Bounds checking
+ * - Byte / Halfword / Word / Doubleword access
+ * - Little-Endian / Big-Endian
+ * - Memory alignment rules
+ *
+ * Future:
+ * - MMU
+ * - Cached
+ * - Uncached
+ * - Uncached Accelerated
+ * - CCA
+ * - CP0-related memory attributes
+ */
 
 // FOR MEMORY ~64 MB
 typedef struct Memory {
 	uint8_t memory[MAX_SIZE];
+	Mips64Endian endian; 
 } Memory;
 
-typedef enum Mips64Exception{
-	MIPS_EXCEPTION_NONE = 0,
-	MIPS_EXCEPTION_ADEL, // Address error on Load
-	MIPS_EXCEPTION_ADES  // Address error on Store
+typedef enum Mips64MemoryStatus{
+	MIPS64_MEMORY_OK = 0,
+	MIPS64_MEMORY_NULL_POINTER,
+	MIPS64_MEMORY_OUT_OF_BOUNDS,
+	MIPS64_MEMORY_MISALIGNED
 } Mips64Exception;
 
+/*
+ * FULL CHANGE THE FUNCTIONS BECAUSE WILL ALSO BE USING BIG ENDIAN. 
+ * IF THERE WAS ONLY LITTLE ENDIAN, COULD HAVE USED WITH THE NORMAL FUNCTIONS, 
+ * BUT MIPS64 HAS TWO DESCRIBED ENDIANS!!!
+ * */
 
-/* TODO
- * 
- * Then:
- * Release following memory access types:
- * - Uncached;
- * - Cached;
- * - Uncached Accelerated.
- * Also later release:
- * - MMU/CCA
- * - CP0-related memory attributes
-*/
-void mips64_memory_init(Memory* mem);
-void mips64_memory_reset(Memory* mem);
+Mips64MemoryStatus mips64_memory_init(Memory* mem, Mips64Endian endian);
+Mips64MemoryStatus mips64_memory_reset(Memory* mem);
 
-// For read
-uint8_t mips64_8bit_read(Memory* mem, uint64_t address); // Byte = 8 bit
-uint16_t mips64_16bit_read(Memory* mem, uint64_t address); // Halfword = 16 bit
-uint32_t mips64_32bit_read(Memory* mem, uint64_t address); // Word = 32 bit
-uint64_t mips64_64bit_read(Memory* mem, uint64_t address); // Doubleword = 64 bit
+// --READ--
+Mips64MemoryStatus mips64_memory_read8(const Memory* mem, uint64_t address, uint8_t out_value);  // Read Byte = 8 bit
+Mips64MemoryStatus mips64_memory_read16(const Memory* mem, uint64_t address, uint16_t out_value); // Read Halfword = 16 bit
+Mips64MemoryStatus mips64_memory_read32(const Memory* mem, uint64_t address, uint32_t out_value); // Read Word = 32 bit
+Mips64MemoryStatus mips64_memory_read64(const Memory* mem, uint64_t address, uint64_t out_value); // Read Doubleword = 64 bit
 
-// For write
-uint8_t mips64_8bit_write(Memory* mem, uint64_t address, uint8_t value);
-uint16_t mips64_16bit_write(Memory* mem, uint64_t address, uint8_t value);
-uint32_t mips64_32bit_write(Memory* mem, uint64_t address, uint8_t value);
-uint64_t mips64_64bit_write(Memory* mem, uint64_t address, uint8_t value);
+// --WRITE--
+Mips64MemoryStatus mips64_memory_write8(const Memory* mem, uint64_t address, uint8_t out_value);  // Write Byte = 8 bit
+Mips64MemoryStatus mips64_memory_write16(const Memory* mem, uint64_t address, uint8_t out_value); // Write Halfword = 16 bit
+Mips64MemoryStatus mips64_memory_write32(const Memory* mem, uint64_t address, uint8_t out_value); // Write Word = 32 bit
+Mips64MemoryStatus mips64_memory_write64(const Memory* mem, uint64_t address, uint8_t out_value); // Write Doubleword = 64 bit
 
