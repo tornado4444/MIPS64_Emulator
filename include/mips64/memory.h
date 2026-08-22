@@ -1,10 +1,10 @@
 #pragma once
 
+#include "mips64/core.h"
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-
-#include "mips64/core.h"
 
 // memory_size = 64 * 1024 * 1024
 #define MAX_SIZE (64u * 1024u * 1024u)
