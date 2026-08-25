@@ -2,7 +2,7 @@
 
 #include "mips64/decode.h"
 
-void decode_instruction(uint32_t raw, Mips64Decoded* out_instruction) {
+void mips64_decode_instruction(uint32_t raw, Mips64Decoded* out_instruction) {
 	out_instruction->raw = raw;
 
 	out_instruction->opcode = (uint8_t)(raw >> 26) & UINT32_C(0x3F);
@@ -15,6 +15,3 @@ void decode_instruction(uint32_t raw, Mips64Decoded* out_instruction) {
 	out_instruction->target = raw & UINT32_C(0x03FFFFFFFF);
 }
 
-uint64_t sign_extension(uint16_t value) {
-	return (uint64_t)(uint64_t)(uint16_t)value;
-}

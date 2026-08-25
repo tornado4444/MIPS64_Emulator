@@ -46,12 +46,15 @@ typedef enum Mips64Opcode {
 		* - SLTU
 		IN FUTURE NEED BEEN TO TRY THIS OUT, OTHERWISE THERE WILL TOO MANY INSTRUCTIONS!!! NEED FIX THAT MANNNNNN! DAMN, DON'T HAVE MUCH TIME
 	*/
-	MIPS64_OPCODE_SPECIAL,
-	MIPS64_OPCODE_DADDIU,
-	MIPS64_OPCODE_DADDU
+	MIPS64_OPCODE_SPECIAL = 0x00, // meaning from documantation
+	MIPS64_OPCODE_DADDIU = 0x19,  // meaning from documantation
 } Mips64Opcode;
 
+typedef enum Mips64Function {
+	MIPS64_FUNCT_DADDU = 0x20 // function from documentation
+} Mips64Function;
+
 // RELEASE DECODE INSTRUCTION
-static void decode_instruction(uint32_t raw, Mips64Decoded* out_instruction);
-static uint64_t sign_extension(uint16_t value);
+static void mips64_decode_instruction(uint32_t raw, Mips64Decoded* out_instruction);
+
 

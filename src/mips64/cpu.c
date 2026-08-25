@@ -44,7 +44,7 @@ Mips64Status mips64_cpu_mips_get_gpr(const Mips64CPU* cpu, uint32_t index, uint6
 }
 
 Mips64Status mips64_cpu_set_gpr(Mips64CPU* cpu, uint32_t index, uint64_t value) {
-	if (cpu == NULL || value == NULL) {
+	if (cpu == NULL) {
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
 
@@ -77,7 +77,7 @@ Mips64Status mips64_cpu_set_pc(Mips64CPU* cpu, uint64_t pc) {
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
 
-	if (pc & UINT64_C(3) != UINT64_C(0)) {
+	if ((pc & UINT64_C(3) != UINT64_C(0)) {
 		return MIPS64_STATUS_UNALIGNED_PC;
 	}
 
@@ -94,7 +94,7 @@ Mips64Status mips64_cpu_execute(Mips64CPU* cpu, uint32_t raw_instruction) {
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
 
-	decode_instruction(raw_instruction, &raw_instruction);
+	mips64_decode_instruction(raw_instruction, &instruction);
 
 	if (raw_instruction == UINT32_C(0)) {
 		cpu->pc += UINT64_C(4);
@@ -110,63 +110,5 @@ Mips64Status mips64_cpu_execute(Mips64CPU* cpu, uint32_t raw_instruction) {
 		printf("Error or incorrect opcode: ", instruction.opcode);
 		return MIPS64_STATUS_NOT_IMPLEMENTED;
 	}
-	return MIPS64_STATUS_OK;
-}
-
-Mips64Status mips64_execute_special(Mips64CPU* cpu, const Mips64Decoded* instruction) {
-	if (cpu == NULL) {
-		return MIPS64_STATUS_INVALID_ARGUMENT;
-	}
-	
-	switch (instruction->function) {
-	case MIPS64_OPCODE_DADDU:
-		return mips64_execute_special(cpu, &instruction);
-	default:
-		printf("Error or incorrect opcode: ", instruction->function);
-		return MIPS64_STATUS_NOT_IMPLEMENTED;
-	}
-}
-
-Mips64Status mips64_execute_nop(Mips64CPU* cpu, const Mips64Decoded* instruction) {
-	if (instruction == UINT32_C(0)) {
-		cpu->pc += UINT64_C(4);
-		return MIPS64_STATUS_OK;
-	}
-}
-
-Mips64Status mips64_execute_daddiu(Mips64CPU* cpu, const Mips64Decoded* instruction) {
-	uint64_t source;
-	uint64_t immediate;
-	
-	uint64_t result;
-	
-	source = cpu->gpr[instruction->rs];
-
-	immediate = sign_extension(instruction->immediate);
-
-	result = source + immediate;
-
-	if (instruction->rt != 0u) {
-		cpu->gpr[instruction->rt] = result;
-	}
-
-	cpu->gpr[0] = UINT64_C(0);
-	cpu->pc += UINT64_C(4);
-
-	return MIPS64_STATUS_OK;
-}
-
-Mips64Status mips64_execute_daddu(Mips64CPU* cpu, const Mips64Decoded* instruction) {
-	uint64_t result;
-
-	result = cpu->gpr[instruction->rs] + cpu->gpr[instruction->rt];
-
-	if (instruction->rd != 0) {
-		cpu->gpr[instruction->rd] = result;
-	}
-	
-	cpu->gpr[0] = UINT64_C(0);
-	cpu->pc += UINT64_C(4);
-
 	return MIPS64_STATUS_OK;
 }

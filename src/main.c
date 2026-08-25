@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-//#include "mips64/core.h"
+#include "mips64/core.h"
 
 int divide(int a, int b) {
 	return a / b;
