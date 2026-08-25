@@ -82,6 +82,6 @@ void start_program(void) {
 }
 
 int main(int argc, char** argv) {
-	start_program(void);	
+	start_program();	
 	return 0;
 }
