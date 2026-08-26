@@ -1,5 +1,3 @@
-#pragma once
-
 #include "mips64/decode.h"
 
 void mips64_decode_instruction(uint32_t raw, Mips64Decoded* out_instruction) {
