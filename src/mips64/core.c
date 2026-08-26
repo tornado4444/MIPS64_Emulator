@@ -506,8 +506,8 @@ Mips64Status mips64_debug_dump(
 		* For uint64_t, the standard provides PRIx64,
 		* PRIu64, and other macros from inttypes.h.
 	*/
-	written = snprintf(line, sizeof(line), "%s %s \n",
-		"PC = 0x%016" PRIx16 "\n",
+	written = snprintf(line, sizeof(line), "%s %s\n",
+		"PC = 0x%016" PRIx64 "\n",
 		mips64_core_name(),
 		mips64_core_version_string(),
 		emulator->cpu.pc);
