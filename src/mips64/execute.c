@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "mips64/execute.h"
 
 static uint64_t sign_extension(uint16_t value)
@@ -61,7 +63,7 @@ static Mips64Status mips64_execute_special(Mips64CPU* cpu, const Mips64Decoded* 
 	case MIPS64_FUNCT_DADDU:
 		return mips64_execute_daddu(cpu, instruction);
 	default:
-		printf("Error or incorrect opcode: ", instruction->function);
+		printf("Error or incorrect opcode: 0x%02X\n", (unsigned)instruction->function);
 		return MIPS64_STATUS_NOT_IMPLEMENTED;
 	}
 }

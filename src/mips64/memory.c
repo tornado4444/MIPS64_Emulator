@@ -42,8 +42,10 @@ Mips64MemoryStatus mips64_memory_init(Memory* mem, Mips64Endian endian) {
 		printf("Error to init memory");
 		return MIPS64_MEMORY_NULL_POINTER;
 	}
-
+	
+	
 	memset(mem->memory, 0, sizeof(*mem));
+	mem->endian = endian;
 	return MIPS64_MEMORY_OK;
 }
 
