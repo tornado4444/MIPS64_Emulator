@@ -311,7 +311,7 @@ Mips64Status mips64_step(
 	}
 
 	if (out_info != NULL) {
-		out_info->stop_reason = MIPS64_STATUS_NOT_IMPLEMENTED;
+		out_info->stop_reason = MIPS64_STOP_NOT_IMPLEMENTED;
 	}
 
 	return MIPS64_STATUS_NOT_IMPLEMENTED;
@@ -322,7 +322,7 @@ Mips64Status mips64_run_program(
 	uint64_t max_steps,
 	Mips64RunInfo* out_info
 ) {
-	uint64_t step_index;
+	uint64_t step_index = 0;
 
 	if (emulator == NULL) {
 		return MIPS64_STATUS_INVALID_ARGUMENT;
@@ -338,7 +338,7 @@ Mips64Status mips64_run_program(
 		out_info->last_status = MIPS64_STATUS_OK;
 	}
 
-	for (int i = UINT64_C(0); i < max_steps; ++i) {
+	for (uint64_t i = 0; i < max_steps; ++i) {
 		Mips64Status status;
 
 		status = mips64_step(emulator, NULL);
@@ -376,7 +376,7 @@ Mips64Status mips64_run_program(
 
 Mips64Status mips64_get_pc(
 	const Mips64Emulator* emulator,
-	uint64_t out_pc
+	uint64_t* out_pc
 ) {
 	if (emulator == NULL || out_pc == NULL) {
 		return MIPS64_STATUS_INVALID_ARGUMENT;
@@ -491,7 +491,7 @@ Mips64Status mips64_debug_dump(
 	void* user_data
 ) {
 	char line[128];
-	uint32_t index;
+	uint32_t index = 0;
 	uint64_t value;
 	int written;
 
@@ -534,7 +534,7 @@ Mips64Status mips64_debug_dump(
 			value
 		);
 
-		if (written = 0 || (size_t)written >= sizeof(line)) {
+		if (written == 0 || (size_t)written >= sizeof(line)) {
 			return MIPS64_STATUS_INTERNAL_ERROR;
 		}
 

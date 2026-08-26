@@ -46,7 +46,7 @@ typedef enum Mips64Endian {
 
 typedef enum Mips64StopReason {
 	MIPS64_STOP_REASON_NONE = 0,
-
+	MIPS64_STOP_NOT_IMPLEMENTED,
 	MIPS64_STOP_REASON_NOT_IMPLEMENTED,
 	MIPS64_STOP_REASON_STEP_LIMIT,
 	MIPS64_STOP_REASON_ERROR
@@ -133,7 +133,7 @@ MIPS64_API Mips64Status mips64_run_program(
 );
 
 MIPS64_API Mips64Status mips64_get_pc(
-	const Mips64Emulator* emulator, uint64_t out_pc
+	const Mips64Emulator* emulator, uint64_t* out_pc
 );
 
 MIPS64_API Mips64Status mips64_set_pc(
