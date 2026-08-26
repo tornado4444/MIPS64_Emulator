@@ -31,6 +31,28 @@
     },
 
     {
+      "name": "linux-debug",
+      "displayName": "Linux Debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/linux-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "MIPS64_BUILD_CLI": "ON"
+      }
+    },
+
+    {
+      "name": "linux-release",
+      "displayName": "Linux Release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/linux-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "MIPS64_BUILD_CLI": "ON"
+      }
+    },
+
+    {
       "name": "android-debug",
       "displayName": "Android Debug",
       "generator": "Ninja",
@@ -52,6 +74,17 @@
       "name": "windows-release",
       "configurePreset": "windows-release"
     },
+
+    {
+      "name": "linux-debug",
+      "configurePreset": "linux-debug"
+    },
+    
+    {
+      "name": "linux-release",
+      "configurePreset": "linux-release"
+    },
+
 
     {
       "name": "android-debug",
