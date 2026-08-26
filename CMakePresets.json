@@ -1,57 +1,61 @@
 {
   "version": 3,
+
   "cmakeMinimumRequired": {
     "major": 3,
     "minor": 20,
     "patch": 0
   },
+
   "configurePresets": [
     {
-      "name": "debug",
-      "displayName": "Debug",
-      "description": "Default debug build for the current platform and compiler.",
-      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "name": "windows-debug",
+      "displayName": "Windows Debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/windows-debug",
       "cacheVariables": {
-        "MIPS64_DEFAULT_BUILD_TYPE": "Debug",
+        "CMAKE_BUILD_TYPE": "Debug",
         "MIPS64_BUILD_CLI": "ON"
       }
     },
+
     {
-      "name": "release",
-      "displayName": "Release",
-      "description": "Optimized release build for the current platform and compiler.",
-      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "name": "windows-release",
+      "displayName": "Windows Release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/windows-release",
       "cacheVariables": {
-        "MIPS64_DEFAULT_BUILD_TYPE": "Release",
+        "CMAKE_BUILD_TYPE": "Release",
         "MIPS64_BUILD_CLI": "ON"
       }
     },
+
     {
       "name": "android-debug",
       "displayName": "Android Debug",
-      "description": "Android-oriented preset. Pass CMAKE_TOOLCHAIN_FILE and ANDROID_ABI from Android Studio or Gradle.",
-      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/android-debug",
       "cacheVariables": {
-        "MIPS64_DEFAULT_BUILD_TYPE": "Debug",
+        "CMAKE_BUILD_TYPE": "Debug",
         "MIPS64_BUILD_CLI": "OFF"
       }
     }
   ],
+
   "buildPresets": [
     {
-      "name": "debug",
-      "configurePreset": "debug",
-      "configuration": "Debug"
+      "name": "windows-debug",
+      "configurePreset": "windows-debug"
     },
+
     {
-      "name": "release",
-      "configurePreset": "release",
-      "configuration": "Release"
+      "name": "windows-release",
+      "configurePreset": "windows-release"
     },
+
     {
       "name": "android-debug",
-      "configurePreset": "android-debug",
-      "configuration": "Debug"
+      "configurePreset": "android-debug"
     }
   ]
 }

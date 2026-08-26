@@ -51,7 +51,7 @@ typedef enum Mips64Opcode {
 } Mips64Opcode;
 
 typedef enum Mips64Function {
-	MIPS64_FUNCT_DADDU = 0x20 // function from documentation
+	MIPS64_FUNCT_DADDU = 0x2D // function from documentation
 } Mips64Function;
 
 // RELEASE DECODE INSTRUCTION

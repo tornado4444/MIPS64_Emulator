@@ -79,7 +79,7 @@ static int start_program(void) {
 		 *
 		 * MIPS64_FUNCT_DADDU must be function code, not primary code
 		 * */
-		((uint32_t) MIPS64_FUNCT_DADDU << 26) | (1u << 21) | (2u << 16) | (3u << 11) | (0u << 6) | MIPS64_FUNCT_DADDU
+		((uint32_t) MIPS64_OPCODE_SPECIAL << 26) | (1u << 21) | (2u << 16) | (3u << 11) | (0u << 6) | MIPS64_FUNCT_DADDU
 	};
 	const size_t instruction_count = sizeof(program) / sizeof(program[0]);
 
@@ -91,12 +91,9 @@ static int start_program(void) {
 
 		if (status != MIPS64_MEMORY_OK) {
 			fprintf(stderr, "Failed to write instruction %zu at 0x%016" PRIx64 "\n", i, address);
+			return 1;
 		}
-
-		return 0;
 	}
-
-	printf("Program initialize in memory\n\n");
 
 	// FETCH -> DECODE -> EXECUTE
 
@@ -153,13 +150,13 @@ static int start_program(void) {
 
 		if (ex_status != MIPS64_STATUS_OK) {
 			fprintf(stderr, "Execution failed at PC=0x%016" PRIx64 "\n", pc);
-			return 0;
+			return 1;
 		}
 
 		// WHILE HAVEN'T branches/jumps/exceptions, JUST WRITE PC + 4
 		if (mips64_cpu_set_pc(&cpu, pc + UINT64_C(4)) != MIPS64_STATUS_OK) {
 			fprintf(stderr, "Failed to update PC\n");
-			return 0;
+			return 1;
 		}
 	
 		printf("\n");
@@ -170,7 +167,7 @@ static int start_program(void) {
 	uint64_t r2 = 0;
 	uint64_t r3 = 0;
 
-	mips64_cpu_mips_get_gpr(&cpu, 2, &r2);
+	mips64_cpu_mips_get_gpr(&cpu, 1, &r1);
 	mips64_cpu_mips_get_gpr(&cpu, 2, &r2);
 	mips64_cpu_mips_get_gpr(&cpu, 3, &r3);
 
@@ -195,6 +192,7 @@ static int start_program(void) {
 	}
 
 	printf("\nTEST PASSED\n");
+	return 0;
 }
 
 int main(void) {
