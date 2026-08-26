@@ -13,6 +13,10 @@ project(Mips64_Emulator VERSION 0.1.0 DESCRIPTION "Making MIPS64_Emulator" LANGU
 #    target_sources: Add source files
 add_library(MIPS64_Core SHARED)
 
+set_target_properties(MIPS64_Core PROPERTIES
+    WINDOWS_EXPORT_ALL_SYMBOLS ON
+)
+
 set(HEADER_LIST
 	include/mips64/core.h
 	include/mips64/cpu.h

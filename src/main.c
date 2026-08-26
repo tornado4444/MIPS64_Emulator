@@ -1,5 +1,6 @@
 #include <inttypes.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "mips64/core.h"
 #include "mips64/cpu.h"
@@ -7,7 +8,7 @@
 #include "mips64/decode.h"
 #include "mips64/execute.h"
 
-void start_program(void) {
+static int start_program(void) {
 	/*
 	 * VERY IMPORTANTANT!!!
 	 * Memory has 64 MB
@@ -18,9 +19,9 @@ void start_program(void) {
 	Mips64CPU cpu;
 
 	// Little Endian
-	if(mips64_memory_init(&memory, MIPS64_ENDIAN_LITTLE)) {
+	if(mips64_memory_init(&memory, MIPS64_ENDIAN_LITTLE) != MIPS64_MEMORY_OK) {
 		fprintf(stderr, "Failed initialize memory\n");
-		return 1;
+		return 0;
 	}
 
 	/*
@@ -80,9 +81,122 @@ void start_program(void) {
 		 * */
 		((uint32_t) MIPS64_FUNCT_DADDU << 26) | (1u << 21) | (2u << 16) | (3u << 11) | (0u << 6) | MIPS64_FUNCT_DADDU
 	};
+	const size_t instruction_count = sizeof(program) / sizeof(program[0]);
+
+	// LOAD PROGRAM INTO EMULATED MEMORY
+	for (size_t i = 0; i < instruction_count; ++i) {
+		const uint64_t address = (uint64_t)i * UINT64_C(4);
+
+		Mips64MemoryStatus status = mips64_memory_write32(&memory,address,program[i]);
+
+		if (status != MIPS64_MEMORY_OK) {
+			fprintf(stderr, "Failed to write instruction %zu at 0x%016" PRIx64 "\n", i, address);
+		}
+
+		return 0;
+	}
+
+	printf("Program initialize in memory\n\n");
+
+	// FETCH -> DECODE -> EXECUTE
+
+	for (size_t instruction_step = 0; instruction_step < instruction_count; ++instruction_step) {
+		uint64_t pc = 0;
+
+		if (mips64_cpu_get_pc(&cpu, &pc) != MIPS64_STATUS_OK) {
+			fprintf(stderr, "Failed to read PC\n");
+			return 0;
+		}
+
+		/*
+		* FETCH
+		* 
+		* PC HAS ADDRESS INSTRUCTION
+		* 
+		* 32 bits instruction
+		*/
+		uint32_t raw_instruction = 0;
+
+		Mips64MemoryStatus memory_status = mips64_memory_read32(&memory,pc,&raw_instruction);
+
+		if (memory_status != MIPS64_MEMORY_OK) {
+			fprintf(stderr,"Instruction fetch failed at PC=0x%016" PRIx64 "\n",pc);
+			return 0;
+		}
+
+		printf("STEP %zu\n""  PC  = 0x%016" PRIx64 "\n""  RAW = 0x%08" PRIx32 "\n", instruction_step, pc, raw_instruction);
+
+		// DECODE
+		Mips64Decoded decode;
+
+		mips64_decode_instruction(raw_instruction, &decode);
+
+		printf(
+			"  opcode = 0x%02" PRIx8 "\n"
+			"  rs     = %" PRIu8 "\n"
+			"  rt     = %" PRIu8 "\n"
+			"  rd     = %" PRIu8 "\n"
+			"  shamt  = %" PRIu8 "\n"
+			"  funct  = 0x%02" PRIx8 "\n"
+			"  imm    = 0x%04" PRIx16 "\n",
+			decode.opcode,
+			decode.rs,
+			decode.rt,
+			decode.rd,
+			decode.shift_amount,
+			decode.function,
+			decode.immediate
+		);
+
+		// EXECUTE
+		Mips64Status ex_status = mips64_cpu_execute(&cpu, &decode);
+
+		if (ex_status != MIPS64_STATUS_OK) {
+			fprintf(stderr, "Execution failed at PC=0x%016" PRIx64 "\n", pc);
+			return 0;
+		}
+
+		// WHILE HAVEN'T branches/jumps/exceptions, JUST WRITE PC + 4
+		if (mips64_cpu_set_pc(&cpu, pc + UINT64_C(4)) != MIPS64_STATUS_OK) {
+			fprintf(stderr, "Failed to update PC\n");
+			return 0;
+		}
+	
+		printf("\n");
+	}
+
+	// VERIFY RESULTS
+	uint64_t r1 = 0;
+	uint64_t r2 = 0;
+	uint64_t r3 = 0;
+
+	mips64_cpu_mips_get_gpr(&cpu, 2, &r2);
+	mips64_cpu_mips_get_gpr(&cpu, 2, &r2);
+	mips64_cpu_mips_get_gpr(&cpu, 3, &r3);
+
+	printf("Final registers:\n");
+	printf("  $1 = %" PRIu64 "\n", r1);
+	printf("  $2 = %" PRIu64 "\n", r2);
+	printf("  $3 = %" PRIu64 "\n", r3);
+
+	if (r1 != UINT64_C(10)) {
+		fprintf(stderr, "TEST FAILED: $1 != 10\n");
+		return 0;
+	}
+
+	if (r2 != UINT64_C(20)) {
+		fprintf(stderr, "TEST FAILED: $2 != 20\n");
+		return 0;
+	}
+
+	if (r3 != UINT64_C(30)) {
+		fprintf(stderr, "TEST FAILED: $3 != 30\n");
+		return 0;
+	}
+
+	printf("\nTEST PASSED\n");
 }
 
-int main(int argc, char** argv) {
-	start_program();	
-	return 0;
+int main(void) {
+	return start_program();
 }

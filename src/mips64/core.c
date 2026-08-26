@@ -148,7 +148,7 @@ void mips64_config_default(
 	}
 
 	out_config->memory_size = MIPS64_DEFAULT_MEMORY_SIZE;
-	out_config->reset_pc = UIN64_C(NULL);
+	out_config->reset_pc = UINT64_C(0);
 
 	// TODO IN FUTURE NEED BEEN TESTING little-endian FOR mips64el toolchain
 	out_config->endian = MIPS64_ENDIAN_BIG;
@@ -506,7 +506,7 @@ Mips64Status mips64_debug_dump(
 		* For uint64_t, the standard provides PRIx64,
 		* PRIu64, and other macros from inttypes.h.
 	*/
-	written = snprinf(line, sizeof(line), "%s %s \n",
+	written = snprintf(line, sizeof(line), "%s %s \n",
 		"PC = 0x%016" PRIx16 "\n",
 		mips64_core_name(),
 		mips64_core_version_string(),

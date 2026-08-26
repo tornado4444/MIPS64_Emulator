@@ -55,6 +55,6 @@ typedef enum Mips64Function {
 } Mips64Function;
 
 // RELEASE DECODE INSTRUCTION
-static void mips64_decode_instruction(uint32_t raw, Mips64Decoded* out_instruction);
+void mips64_decode_instruction(uint32_t raw, Mips64Decoded* out_instruction);
 
 
