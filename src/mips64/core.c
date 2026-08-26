@@ -382,7 +382,7 @@ Mips64Status mips64_get_pc(
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
 
-	out_pc = emulator->cpu.pc;
+	*out_pc = emulator->cpu.pc;
 
 	return MIPS64_STATUS_OK;
 }
@@ -391,11 +391,16 @@ Mips64Status mips64_set_pc(
 	Mips64Emulator* emulator, 
 	uint64_t set_pc 
 ) {
-	if (emulator == NULL || set_pc == NULL) {
+
+	if (emulator == NULL) {
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
 
-	set_pc = emulator->cpu.pc;
+	if ((set_pc & UINT64_C(3)) != UINT64_C(0)) {
+		return MIPS64_STATUS_UNALIGNED_PC;
+	}
+
+	emulator->cpu.pc = set_pc;
 
 	return MIPS64_STATUS_OK;
 }
@@ -403,11 +408,17 @@ Mips64Status mips64_set_pc(
 Mips64Status mips_get_gpr(
 	Mips64Emulator* emulator,
 	uint32_t index,
-	uint64_t get_gpr
+	uint64_t* get_gpr
 ) {
 	if (emulator == NULL) {
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
+
+	return mips64_cpu_mips_get_gpr(
+		&emulator->cpu,
+		index,
+		get_gpr
+	);
 }
 
 Mips64Status mips_set_gpr(
@@ -418,6 +429,12 @@ Mips64Status mips_set_gpr(
 	if (emulator == NULL) {
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
+
+	return mips64_cpu_set_gpr(
+		&emulator->cpu,
+		index,
+		set_gpr
+	);
 }
 
 Mips64Status mips64_read_memory(
@@ -425,9 +442,14 @@ Mips64Status mips64_read_memory(
 	uint64_t guest_address,
 	void* out_data, size_t size
 ) {
-	if (emulator == NULL) {
+	if (emulator == NULL || out_data == NULL) {
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
+
+	(void)guest_address;
+	(void)size;
+
+	return MIPS64_STATUS_NOT_IMPLEMENTED;
 }
 
 Mips64Status mips64_write_memory(
@@ -506,8 +528,7 @@ Mips64Status mips64_debug_dump(
 		* For uint64_t, the standard provides PRIx64,
 		* PRIu64, and other macros from inttypes.h.
 	*/
-	written = snprintf(line, sizeof(line), "%s %s\n",
-		"PC = 0x%016" PRIx64 "\n",
+	written = snprintf(line, sizeof(line), "%s %s\nPC = 0x%064" PRIx64 "\n",
 		mips64_core_name(),
 		mips64_core_version_string(),
 		emulator->cpu.pc);
@@ -518,7 +539,7 @@ Mips64Status mips64_debug_dump(
 
 	write_fn(user_data, line, (size_t)written);
 
-	for (int i = 0u; i < MIPS64_GPR_COUNT; ++i) {
+	for (uint32_t i = 0u; i < MIPS64_GPR_COUNT; ++i) {
 		if (index == 0u) {
 			value = UINT64_C(0);
 		}
