@@ -5,6 +5,7 @@
 #include "mips64/cpu.h"
 #include "mips64/memory.h"
 #include "mips64/decode.h"
+#include "mips64/execute.h"
 
 void start_program(void) {
 	/*
@@ -17,7 +18,7 @@ void start_program(void) {
 	Mips64CPU cpu;
 
 	// Little Endian
-	if(mips64_memory_init(&memory, MIPS64_LITTLE_ENDIAN)) {
+	if(mips64_memory_init(&memory, MIPS64_ENDIAN_LITTLE)) {
 		fprintf(stderr, "Failed initialize memory\n");
 		return 1;
 	}

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "mips64/core.h"
-
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+
+#include "mips64/cpu.h"
 
 // memory_size = 64 * 1024 * 1024
 #define MAX_SIZE (64u * 1024u * 1024u)
@@ -37,7 +37,7 @@ typedef enum Mips64MemoryStatus{
 	MIPS64_MEMORY_NULL_POINTER,
 	MIPS64_MEMORY_OUT_OF_BOUNDS,
 	MIPS64_MEMORY_MISALIGNED
-} Mips64Exception;
+} Mips64MemoryStatus;
 
 /*
  * FULL CHANGE THE FUNCTIONS BECAUSE WILL ALSO BE USING BIG ENDIAN. 
@@ -55,8 +55,8 @@ Mips64MemoryStatus mips64_memory_read32(const Memory* mem, uint64_t address, uin
 Mips64MemoryStatus mips64_memory_read64(const Memory* mem, uint64_t address, uint64_t* out_value);  // Read Doubleword = 64 bit
 
 // --WRITE--
-Mips64MemoryStatus mips64_memory_write8(const Memory* mem, uint64_t address, uint8_t value);   // Write Byte = 8 bit
-Mips64MemoryStatus mips64_memory_write16(const Memory* mem, uint64_t address, uint16_t value); // Write Halfword = 16 bit
-Mips64MemoryStatus mips64_memory_write32(const Memory* mem, uint64_t address, uint32_t value); // Write Word = 32 bit
-Mips64MemoryStatus mips64_memory_write64(const Memory* mem, uint64_t address, uint64_t value); // Write Doubleword = 64 bit
+Mips64MemoryStatus mips64_memory_write8(Memory* mem, uint64_t address, uint8_t value);   // Write Byte = 8 bit
+Mips64MemoryStatus mips64_memory_write16(Memory* mem, uint64_t address, uint16_t value); // Write Halfword = 16 bit
+Mips64MemoryStatus mips64_memory_write32(Memory* mem, uint64_t address, uint32_t value); // Write Word = 32 bit
+Mips64MemoryStatus mips64_memory_write64(Memory* mem, uint64_t address, uint64_t value); // Write Doubleword = 64 bit
 

@@ -17,6 +17,8 @@ set(HEADER_LIST
 	include/mips64/core.h
 	include/mips64/cpu.h
 	include/mips64/memory.h
+	include/mips64/decode.h
+	include/mips64/execute.h
 )
 
 # ONLY FOR MSVC
@@ -32,6 +34,8 @@ target_sources(MIPS64_Core
 		src/mips64/core.c
 		src/mips64/cpu.c
 		src/mips64/memory.c
+		src/mips64/decode.c
+		src/mips64/execute.c
 
 	PUBLIC
 		${HEADER_LIST}

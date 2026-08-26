@@ -1,5 +1,7 @@
-#include "mips64/cpu.h"
 #include <string.h>
+
+#include "mips64/cpu.h"
+#include "mips64/decode.h"
 
 // TODO IN FUTURE RELEASE ELF AND JIT!!!!!!!
 void mips64_cpu_init(Mips64CPU* cpu, uint64_t reset_pc) {
@@ -77,12 +79,12 @@ Mips64Status mips64_cpu_set_pc(Mips64CPU* cpu, uint64_t pc) {
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
 
-	if ((pc & UINT64_C(3) != UINT64_C(0)) {
+	if (pc & UINT64_C(3) != UINT64_C(0)) {
 		return MIPS64_STATUS_UNALIGNED_PC;
 	}
 
-	cpu->pc = pc;
 
+	cpu->pc = pc;
 	return MIPS64_STATUS_OK;
 }
 
