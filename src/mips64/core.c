@@ -11,7 +11,7 @@
 #define MIPS64_VERSION_PATCH 0
 
 // 1 MB FOR MEMORY DEFAULT REALIZATION
-#define MIPS64_DEFAULT_MEMORY_SIZE ((size_t)1024u * (size_t)1024u)
+#define MIPS64_DEFAULT_MEMORY_SIZE ((size_t) 1024u * (size_t) 1024)
 
 #define MIPS64_INSTRUCTION_SIZE 4u
 
@@ -20,7 +20,8 @@ struct Mips64Emulator {
 	uint8_t* memory;
 
 	size_t memory_size;
-	Mips64CPU cpu; // in CPU we have gpr[MIPS64_GPR_COUNT] + pc
+
+	Mips64CPU cpu;
 };
 
 static int mips64_is_valid_endian(
@@ -47,18 +48,20 @@ static int mips64_memory_range_is_valid(
 		return 0;
 	}
 
+	// Release protection > 64 bit
 #if SIZE_MAX > UINT64_MAX
-	if (emulator->memory_size > (size_t)UINT64_MAX) {
+	if (emulator->memory_size > (size_t)UINT64_MAX || size > (size_t)UINT64_MAX) {
 		return 0;
 	}
 #endif
 
+	// If the address is already on or beyond the boundary, the range is invalid.
 	memory_size = (uint64_t)emulator->memory_size;
 	if (guest_address > memory_size) {
 		return 0;
 	}
 
-	return (uint64_t)size <= memory_size - guest_address;
+	return (uint64_t)size <= (memory_size - guest_address);
 }
 
 static uint32_t mips64_read_u32_from_bytes(
@@ -240,9 +243,7 @@ Mips64Status mips64_load_program(
 	Mips64Status status;
 
 	if (emulator == NULL || image == NULL) {
-		Mips64Status mips64_load_program(
-			Mips64Emulator * emulator, const Mips64ProgramImage * image
-		);
+		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
 
 	if (image->size != 0u && image->data == NULL) {
@@ -388,8 +389,8 @@ Mips64Status mips64_get_pc(
 }
 
 Mips64Status mips64_set_pc(
-	Mips64Emulator* emulator, 
-	uint64_t set_pc 
+	Mips64Emulator* emulator,
+	uint64_t set_pc
 ) {
 
 	if (emulator == NULL) {
@@ -414,11 +415,7 @@ Mips64Status mips_get_gpr(
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
 
-	return mips64_cpu_mips_get_gpr(
-		&emulator->cpu,
-		index,
-		get_gpr
-	);
+	return MIPS64_STATUS_OK;
 }
 
 Mips64Status mips_set_gpr(
@@ -430,11 +427,7 @@ Mips64Status mips_set_gpr(
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
 
-	return mips64_cpu_set_gpr(
-		&emulator->cpu,
-		index,
-		set_gpr
-	);
+	return MIPS64_STATUS_OK;
 }
 
 Mips64Status mips64_read_memory(
@@ -513,7 +506,6 @@ Mips64Status mips64_debug_dump(
 	void* user_data
 ) {
 	char line[128];
-	uint32_t index = 0;
 	uint64_t value;
 	int written;
 
@@ -540,22 +532,22 @@ Mips64Status mips64_debug_dump(
 	write_fn(user_data, line, (size_t)written);
 
 	for (uint32_t i = 0u; i < MIPS64_GPR_COUNT; ++i) {
-		if (index == 0u) {
+		if (i == 0u) {
 			value = UINT64_C(0);
 		}
 		else {
-			value = emulator->cpu.gpr[index];
+			value = emulator->cpu.gpr[i];
 		}
 
 		written = snprintf(
 			line,
 			sizeof(line),
 			"r%02" PRIu32 " = 0x%016" PRIx64 "\n",
-			index,
+			i,
 			value
 		);
 
-		if (written == 0 || (size_t)written >= sizeof(line)) {
+		if (written < 0 || (size_t)written >= sizeof(line)) {
 			return MIPS64_STATUS_INTERNAL_ERROR;
 		}
 

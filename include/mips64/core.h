@@ -141,7 +141,7 @@ MIPS64_API Mips64Status mips64_set_pc(
 );
 
 MIPS64_API Mips64Status mips_get_gpr(
-	Mips64Emulator* emulator, uint32_t index, uint64_t get_gpr
+	Mips64Emulator* emulator, uint32_t index, uint64_t* get_gpr
 );
 
 MIPS64_API Mips64Status mips_set_gpr(

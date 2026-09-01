@@ -19,7 +19,7 @@ static int start_program(void) {
 	Mips64CPU cpu;
 
 	// Little Endian
-	if(mips64_memory_init(&memory, MIPS64_ENDIAN_LITTLE) != MIPS64_MEMORY_OK) {
+	if (mips64_memory_init(&memory, MIPS64_ENDIAN_LITTLE) != MIPS64_MEMORY_OK) {
 		fprintf(stderr, "Failed initialize memory\n");
 		return 0;
 	}
@@ -33,7 +33,7 @@ static int start_program(void) {
 	/*
 	 * TEST PROGRAM
 	 * For that example:
-	 * 
+	 *
 	 * DADDIU $1, $0, 10,
 	 * DADDIU $2, $0, 20,
 	 * DADDU  $3, $0, $2;
@@ -45,7 +45,7 @@ static int start_program(void) {
 	 * Print:
 	 *
 	 * GPR[1] = 10 -> GPR[2] = 20 -> GPR[3] = 30;
-	 * 
+	 *
 	 * Every instruction MIPS32/MIPS64 base ISA takes 32 bits. adresses:
 	 *
 	 * instruction 0 -> 0x0000
@@ -54,19 +54,19 @@ static int start_program(void) {
 	 * */
 	const uint32_t program[] = {
 		/*
-         	* DADDIU $1, $0, 10 -> 0x011001
-         	*
-         	* opcode = DADDIU
-         	* rs     = 0
-         	* rt     = 1
-         	* imm    = 10
-         	*/
+			* DADDIU $1, $0, 10 -> 0x011001
+			*
+			* opcode = DADDIU
+			* rs     = 0
+			* rt     = 1
+			* imm    = 10
+			*/
 
-		((uint32_t) MIPS64_OPCODE_DADDIU << 26) | (0u << 21) | (1u << 16) | 10u,
+		((uint32_t)MIPS64_OPCODE_DADDIU << 26) | (0u << 21) | (1u << 16) | 10u,
 		/*
 		 * DADDU $2, $0, 20
 		 * */
-		((uint32_t) MIPS64_OPCODE_DADDIU << 26) | (0u << 21) | (2u << 16) | 20u,
+		((uint32_t)MIPS64_OPCODE_DADDIU << 26) | (0u << 21) | (2u << 16) | 20u,
 		/*
 		 * DADDU $3, $1, $2
 		 *
@@ -79,7 +79,7 @@ static int start_program(void) {
 		 *
 		 * MIPS64_FUNCT_DADDU must be function code, not primary code
 		 * */
-		((uint32_t) MIPS64_OPCODE_SPECIAL << 26) | (1u << 21) | (2u << 16) | (3u << 11) | (0u << 6) | MIPS64_FUNCT_DADDU
+		((uint32_t)MIPS64_OPCODE_SPECIAL << 26) | (1u << 21) | (2u << 16) | (3u << 11) | (0u << 6) | MIPS64_FUNCT_DADDU
 	};
 	const size_t instruction_count = sizeof(program) / sizeof(program[0]);
 
@@ -87,7 +87,7 @@ static int start_program(void) {
 	for (size_t i = 0; i < instruction_count; ++i) {
 		const uint64_t address = (uint64_t)i * UINT64_C(4);
 
-		Mips64MemoryStatus status = mips64_memory_write32(&memory,address,program[i]);
+		Mips64MemoryStatus status = mips64_memory_write32(&memory, address, program[i]);
 
 		if (status != MIPS64_MEMORY_OK) {
 			fprintf(stderr, "Failed to write instruction %zu at 0x%016" PRIx64 "\n", i, address);
@@ -107,17 +107,17 @@ static int start_program(void) {
 
 		/*
 		* FETCH
-		* 
+		*
 		* PC HAS ADDRESS INSTRUCTION
-		* 
+		*
 		* 32 bits instruction
 		*/
 		uint32_t raw_instruction = 0;
 
-		Mips64MemoryStatus memory_status = mips64_memory_read32(&memory,pc,&raw_instruction);
+		Mips64MemoryStatus memory_status = mips64_memory_read32(&memory, pc, &raw_instruction);
 
 		if (memory_status != MIPS64_MEMORY_OK) {
-			fprintf(stderr,"Instruction fetch failed at PC=0x%016" PRIx64 "\n",pc);
+			fprintf(stderr, "Instruction fetch failed at PC=0x%016" PRIx64 "\n", pc);
 			return 0;
 		}
 
@@ -158,7 +158,7 @@ static int start_program(void) {
 			fprintf(stderr, "Failed to update PC\n");
 			return 1;
 		}
-	
+
 		printf("\n");
 	}
 
