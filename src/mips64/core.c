@@ -406,7 +406,7 @@ Mips64Status mips64_set_pc(
 	return MIPS64_STATUS_OK;
 }
 
-Mips64Status mips_get_gpr(
+Mips64Status mips64_get_gpr(
 	Mips64Emulator* emulator,
 	uint32_t index,
 	uint64_t* get_gpr
@@ -418,7 +418,7 @@ Mips64Status mips_get_gpr(
 	return MIPS64_STATUS_OK;
 }
 
-Mips64Status mips_set_gpr(
+Mips64Status mips64_set_gpr(
 	Mips64Emulator* emulator,
 	uint32_t index,
 	uint64_t set_gpr
@@ -554,4 +554,10 @@ Mips64Status mips64_debug_dump(
 		write_fn(user_data, line, (size_t)written);
 	}
 	return MIPS64_STATUS_OK;
+}
+
+Mips64Status mips64_machine_reset(const Mips64Status* emulator) {
+	if (emulator == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
 }

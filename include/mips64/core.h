@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <memory.h>
 
 // ADDING extern "C" 
 #ifdef __cplusplus
@@ -57,11 +58,6 @@ typedef struct Mips64Config {
 	uint64_t reset_pc;
 
 	Mips64Endian endian;
-	/* TODO
-	- CPU reset;
-	- machine reset;
-	- memory clear;
-	*/
 	int clear_memory_on_reset;
 } Mips64Config;
 
@@ -140,11 +136,11 @@ MIPS64_API Mips64Status mips64_set_pc(
 	Mips64Emulator* emulator, uint64_t set_pc 
 );
 
-MIPS64_API Mips64Status mips_get_gpr(
+MIPS64_API Mips64Status mips64_get_gpr(
 	Mips64Emulator* emulator, uint32_t index, uint64_t* get_gpr
 );
 
-MIPS64_API Mips64Status mips_set_gpr(
+MIPS64_API Mips64Status mips64_set_gpr(
 	Mips64Emulator* emulator, uint32_t index, uint64_t set_gpr
 );
 
@@ -165,6 +161,16 @@ MIPS64_API const char* mips64_status_string(
 
 MIPS64_API Mips64Status mips64_debug_dump(
 	const Mips64Emulator* emulator, Mips64DebugWriteFn write_fn, void* user_data
+);
+
+//// CPU reset
+//MIPS64_API Mips64Status mips64_cpu_reset(
+//	const Mips64Emulator* emulator
+//);
+
+// Mashine reset
+MIPS64_API Mips64Status mips64_machine_reset(
+	const Mips64Emulator* emulator
 );
 
 #ifdef __cplusplus

@@ -7,12 +7,15 @@ typedef struct Mips64CPU {
 	uint64_t gpr[MIPS64_GPR_COUNT];
 
 	uint64_t pc; // Program Count register
-	/* TODO NEED BEEN RELEASE ON FUTURE FOR
-	* uint64_t hi; // Multiply and Divide register higher result(Removed in Release 6,
-	* I'll implement it anyway because I'll be making several releases, including Release 2.)
-	* uint64_t lo; // Multiply and Divide register lower result(Removed in Release 6,
-	* but I need I'll implement it anyway because I'll be making several releases, including Release 2.)
-	*/
+    /*
+     * Architectural HI/LO registers used by
+     * older MIPS64 ISA releases.
+     *
+     * Kept in the common CPU state even for
+     * releases where they are not architecturally used.
+     */
+    uint64_t hi; // Multiply and Divide register higher result(lower Release 6)
+    uint64_t lo; // LO - Multiply and Divide register lower result(lower Release 6)
 } Mips64CPU;
 
 void mips64_cpu_init(Mips64CPU* cpu, uint64_t reset_pc);
