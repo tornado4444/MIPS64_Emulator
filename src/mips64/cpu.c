@@ -4,18 +4,7 @@
 #include "mips64/decode.h"
 
 // TODO IN FUTURE RELEASE ELF AND JIT!!!!!!!
-void mips64_cpu_init(Mips64CPU* cpu, uint64_t reset_pc) {
-	if (cpu == NULL) {
-		return;
-	}
-
-	memset(cpu, 0, sizeof(*cpu));
-
-	cpu->pc = reset_pc;
-	cpu->gpr[0] = UINT64_C(0);
-}
-
-void mips64_cpu_reset(const Mips64Emulator* emulator) {
+Mips64Status mips64_cpu_reset(Mips64CPU* cpu, uint64_t reset_pc) {
 	if (cpu == NULL) {
 		return;
 	}

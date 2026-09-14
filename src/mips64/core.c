@@ -556,8 +556,20 @@ Mips64Status mips64_debug_dump(
 	return MIPS64_STATUS_OK;
 }
 
-Mips64Status mips64_machine_reset(const Mips64Status* emulator) {
+Mips64Status mips64_machine_reset(const Mips64Emulator* emulator, Mips64Status status) {
 	if (emulator == NULL) {
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
+
+	status = mips64_cpu_reset(&emulator->memory, emulator->config.reset_pc);
+
+	if (status != MIPS64_STATUS_OK) {
+		return status;
+	}
+
+	if (emulator->config.clear_memory_on_reset != 0) {
+		memset(emulator->memory, 0, emulator->memory_size);
+	}
+
+	return MIPS64_STATUS_OK;
 }

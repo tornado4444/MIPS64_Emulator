@@ -163,14 +163,9 @@ MIPS64_API Mips64Status mips64_debug_dump(
 	const Mips64Emulator* emulator, Mips64DebugWriteFn write_fn, void* user_data
 );
 
-//// CPU reset
-//MIPS64_API Mips64Status mips64_cpu_reset(
-//	const Mips64Emulator* emulator
-//);
-
 // Mashine reset
 MIPS64_API Mips64Status mips64_machine_reset(
-	const Mips64Emulator* emulator
+	const Mips64Emulator* emulator, Mips64Status status
 );
 
 #ifdef __cplusplus
