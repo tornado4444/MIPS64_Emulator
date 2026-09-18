@@ -44,7 +44,7 @@ target_sources(MIPS64_Core
 
 	PUBLIC
 		${HEADER_LIST}
-)
+ "include/mips64/elf_loader.h" "src/mips64/elf_loader.c")
 
 target_include_directories(MIPS64_Core
 	PUBLIC
@@ -74,7 +74,7 @@ else()
 endif()
 
 # CLI executable
-add_executable(Mips64_Emulator src/main.c)
+add_executable(Mips64_Emulator src/main.c "include/mips64/elf_loader.h" "src/mips64/elf_loader.c")
 
 target_link_libraries(Mips64_Emulator
     PRIVATE
