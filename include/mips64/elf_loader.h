@@ -6,6 +6,11 @@
 
 #define EI_NIDENT 16
 
+#define ELFMAG0 0x7f
+#define ELFMAG1 'E'
+#define ELFMAG2 'L'
+#define ELFMAG3 'F'
+
 /*
 	64-Bit Data Types
 	----------------------------------------------------------------------
@@ -68,18 +73,6 @@ typedef union {
 	} fields;
 } Elf64_Ehdr;
 
-typedef enum Mips64ElfClass {
-	MIPS64_ELF_CLASS_NONE = 0,
-	MIPS64_ELF_CLASS_32 = 1,
-	MIPS64_ELF_CLASS_64 = 2
-} Mips64ElfClass;
-
-typedef enum Mips64ElfData {
-	MIPS64_ELF_DATA_NONE = 0,
-	MIPS64_ELF_DATA_LSB = 1,
-	MIPS64_ELF_DATA_MSB = 2
-} Mips64ElfData;
-
 typedef enum Mips64_ELF_TYPE_MIPS {
 	ET_NONE = 0, ET_REL = 1, ET_EXEC = 2,
 	ET_DYN = 3,  ET_CORE = 4, ET_LOPROC = 0x00FF,
@@ -94,5 +87,23 @@ typedef enum MIPS64_ELF_VERSION_MIPS {
 	EV_NONE = 0,
 	EV_CURRENT = 1
 } MIPS64_ELF_VERSION_MIPS;
+
+typedef enum MIPS64_ELF_Ident_Indexes {
+	EI_MAG0 = 0, EI_MAG1 = 1, EI_MAG2 = 2,
+	EI_MAG3 = 3, EI_CLASS = 4, EI_DATA = 5,
+	EI_VERSION = 6, EI_VERSION = 7 // EI_NIDENT = 16 we declared it as a macro #define
+} MIPS64_ELF_Ident_Indexes;
+
+typedef enum Mips64ElfClass {
+	MIPS64_ELF_CLASS_NONE = 0,
+	MIPS64_ELF_CLASS_32 = 1,
+	MIPS64_ELF_CLASS_64 = 2
+} Mips64ElfClass;
+
+typedef enum Mips64ElfData {
+	MIPS64_ELF_DATA_NONE = 0,
+	MIPS64_ELF_DATA_LSB = 1,
+	MIPS64_ELF_DATA_MSB = 2
+} Mips64ElfData;
 
 MIPS64_API Mips64Status mips64_load_elf(Mips64Emulator* emulator, const void* data, size_t size);
