@@ -24,6 +24,7 @@ set(HEADER_LIST
 	include/mips64/memory.h
 	include/mips64/decode.h
 	include/mips64/execute.h
+	include/mips64/elf_loader.h
 )
 
 # ONLY FOR MSVC
@@ -41,7 +42,7 @@ target_sources(MIPS64_Core
 		src/mips64/memory.c
 		src/mips64/decode.c
 		src/mips64/execute.c
-
+		src/mips64/elf_loader.c
 	PUBLIC
 		${HEADER_LIST}
  "include/mips64/elf_loader.h" "src/mips64/elf_loader.c")
@@ -74,7 +75,7 @@ else()
 endif()
 
 # CLI executable
-add_executable(Mips64_Emulator src/main.c "include/mips64/elf_loader.h" "src/mips64/elf_loader.c")
+add_executable(Mips64_Emulator src/main.c)
 
 target_link_libraries(Mips64_Emulator
     PRIVATE

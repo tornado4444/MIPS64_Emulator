@@ -1,10 +1,11 @@
-#include "mips64/core.h"
-#include "mips64/cpu.h"
-
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "mips64/core.h"
+#include "mips64/cpu.h"
+
 
 #define MIPS64_VERSION_MAJOR 0
 #define MIPS64_VERSION_MINOR 1
