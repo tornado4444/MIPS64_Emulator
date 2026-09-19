@@ -4,12 +4,12 @@
 
 #include "mips64/core.h"
 
-#define EI_NIDENT 16
+#define EI_NIDENT			16
 
-#define ELFMAG0 0x7f
-#define ELFMAG1 'E'
-#define ELFMAG2 'L'
-#define ELFMAG3 'F'
+#define ELFMAG0				0x7f
+#define ELFMAG1				'E'
+#define ELFMAG2				'L'
+#define ELFMAG3				'F'
 
 
 #define ELF64_ST_BIND(i)	((i) >> 4)
@@ -20,6 +20,42 @@
 #define ELF64_R_SYM(i)      ((i) >> 8)
 #define ELF64_R_TYPE(i)     ((unsigned char)(i)
 #define ELF64_R_SYM(i)      (((s)<<8)+(unsigned char)(t))
+
+
+// ---------------------------------Special Sections Name--------------------------
+#define ELF_BSS				".bss"
+#define ELF_COMMENT			".comment"
+#define ELF_DATA			".data"
+#define ELF_DATA1			".data1"
+#define ELF_DYNAMIC			".dynamic"
+#define ELF_DYNSTR			".dynstr"
+#define ELF_DYNSYM			".dynsym"
+#define ELF_FINI			".fini"
+#define ELF_GOT				".got"
+#define ELF_HASH			".hash"
+#define ELF_INIT			".init"
+#define ELF_INTERP			".interp"
+#define ELF_LINE			".line"
+#define ELF_NOTE			".note"
+#define ELF_PLT			    ".plt"
+#define ELF_REL				".relname"
+#define ELF_RELA			".relaname"
+#define ELF_RODATA			".rodata"
+#define ELF_RODATA1			".rodata1"
+#define ELF_SHSTRTAB		".shstrtab"
+#define ELF_STRTAB			".strtab"
+#define ELF_SYMTAB			".symtab"
+#define ELF_TEXT			".text"
+
+// ---------------------------------Pre-existing Extensions--------------------------
+#define DT_JMP_REL			23
+
+#define ELF_SDATA_TDESC     ".sdata.tdesc"
+#define ELF_SBSS_LIT4		".sbss.lit4"
+#define ELF_LIT8_REGINFO	".lit8.reginfo"
+#define ELF_GPTAB_LIBLIST	".gptab.liblist"
+#define ELF_CONFLICT		".conflict"
+
 /*
 	64-Bit Data Types
 	----------------------------------------------------------------------
@@ -32,11 +68,11 @@
 	-----------------------------------------------------------------------
 */
 
-typedef uint32_t     Elf64_Addr;
-typedef uint16_t     Elf64_Half;
-typedef uint32_t     Elf64_Off;
-typedef signed int   Elf64_Sword;
-typedef uint32_t     Elf64_Word;
+typedef uint32_t			Elf64_Addr;
+typedef uint16_t			Elf64_Half;
+typedef uint32_t			Elf64_Off;
+typedef signed int			Elf64_Sword;
+typedef uint32_t			Elf64_Word;
 
 /*
 	The architecture of the hardware platform for which the file is created. 
@@ -210,15 +246,15 @@ typedef union Elf64_Phdr {
 	Elf64_Word p_type;
 
 	enum elf_p_type {
-		PT_NULL = 0,
-		PT_LOAD = 1,
+		PT_NULL    = 0,
+		PT_LOAD    = 1,
 		PT_DYNAMIC = 2,
-		PT_INTERP = 3,
-		PT_NOTE = 4,
-		PT_SHLIB = 5,
-		PT_PHDR = 6,
-		PT_LOPROC = 0x70000000,
-		PT_HIPROC = 0x7FFFFFFF
+		PT_INTERP  = 3,
+		PT_NOTE    = 4,
+		PT_SHLIB   = 5,
+		PT_PHDR    = 6,
+		PT_LOPROC  = 0x70000000,
+		PT_HIPROC  = 0x7FFFFFFF
 	} elf_p_type;
 
 	Elf64_Off  p_offset;
@@ -229,5 +265,36 @@ typedef union Elf64_Phdr {
 	Elf64_Word p_flags;
 	Elf64_Word p_align;
 };
+
+// ------------------------------Dynamic Array Tags------------------------
+typedef enum _DYNAMIC {
+	DT_NULL,
+	DT_NEEDED,
+	DT_PLTRELSZ,
+	DT_PLTGOT,
+	DT_HASH,
+	DT_STRTAB,
+	DT_SYMTAB,
+	DT_RELA,
+	DT_RELASZ,
+	DT_RELAENT,
+	DT_STRSZ,
+	DT_SYMENT,
+	DT_INIT,
+	DT_FINI,
+	DT_SONAME,
+	DT_RPATH,
+	DT_SYMBOLIC,
+	DT_REL,
+	DT_RELSZ,
+	DT_RELENT,
+	DT_PLTREL,
+	DT_DEBUG,
+	DT_TEXTREL,
+	DT_JMPREL,
+	DT_BIND_NOW,
+	DT_LOPROC,
+	DT_HIPROC,
+} _DYNAMIC;
 
 MIPS64_API Mips64Status mips64_load_elf(Mips64Emulator* emulator, const void* data, size_t size);
