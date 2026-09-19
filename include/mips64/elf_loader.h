@@ -105,14 +105,14 @@ typedef enum MIPS64_ELF_Ident_Indexes {
 
 typedef enum Mips64ElfClass {
 	MIPS64_ELF_CLASS_NONE = 0,
-	MIPS64_ELF_CLASS_32 = 1,
-	MIPS64_ELF_CLASS_64 = 2
+	MIPS64_ELF_CLASS_32   = 1,
+	MIPS64_ELF_CLASS_64   = 2
 } Mips64ElfClass;
 
 typedef enum Mips64ElfData {
-	MIPS64_ELF_DATA_NONE = 0,
-	MIPS64_ELF_DATA_LSB = 1,
-	MIPS64_ELF_DATA_MSB = 2
+	MIPS64_ELF_DATA_NONE  = 0,
+	MIPS64_ELF_DATA_LSB   = 1,
+	MIPS64_ELF_DATA_MSB   = 2
 } Mips64ElfData;
 
 typedef enum Mips64ElfSSI {
@@ -131,22 +131,22 @@ typedef union Efl64_Shdr {
 	Elf64_Word sh_type;
 
 	enum {
-		SHT_NULL = 0,
+		SHT_NULL	 = 0,
 		SHT_PROGBITS = 1,
-		SHT_SYMTAB = 2,
-		SHT_STRTAB = 3,
-		SHT_RELA = 4,
-		SHT_HASH = 5,
-		SHT_DYNAMIC = 6,
-		SHT_NOTE = 7,
-		SHT_NOBITS = 8,
-		SHT_REL = 9,
-		SHT_SHLIB = 10,
-		SHT_DYNSYM = 11,
-		SHT_LOPROC = 0x70000000,
-		SHT_HIPROC = 0x7FFFFFFF,
-		SHT_LOUSER = 0x80000000,
-		SHT_HIUSER = 0xFFFFFFFF
+		SHT_SYMTAB   = 2,
+		SHT_STRTAB   = 3,
+		SHT_RELA     = 4,
+		SHT_HASH     = 5,
+		SHT_DYNAMIC  = 6,
+		SHT_NOTE     = 7,
+		SHT_NOBITS   = 8,
+		SHT_REL      = 9,
+		SHT_SHLIB    = 10,
+		SHT_DYNSYM   = 11,
+		SHT_LOPROC   = 0x70000000,
+		SHT_HIPROC   = 0x7FFFFFFF,
+		SHT_LOUSER   = 0x80000000,
+		SHT_HIUSER   = 0xFFFFFFFF
 	} elf_sh_type;
 
 	Elf64_Word sh_flags;
@@ -198,10 +198,36 @@ typedef struct Elf64_Rel {
 	Elf64_Addr r_offset;
 	Elf64_Word r_info;
 } Elf64_Rel;
+
 typedef struct Elf64_Rela {
-	Elf64_Addr r_offset;
-	Elf64_Word r_info;
+	Elf64_Addr  r_offset;
+	Elf64_Word  r_info;
 	Elf64_Sword r_addend;
 } Elf64_Rela;
+
+// ------------------------------PROGRAM HEADER------------------------
+typedef union Elf64_Phdr {
+	Elf64_Word p_type;
+
+	enum elf_p_type {
+		PT_NULL = 0,
+		PT_LOAD = 1,
+		PT_DYNAMIC = 2,
+		PT_INTERP = 3,
+		PT_NOTE = 4,
+		PT_SHLIB = 5,
+		PT_PHDR = 6,
+		PT_LOPROC = 0x70000000,
+		PT_HIPROC = 0x7FFFFFFF
+	} elf_p_type;
+
+	Elf64_Off  p_offset;
+	Elf64_Addr p_vaddr;
+	Elf64_Addr p_paddr;
+	Elf64_Word p_filesz;
+	Elf64_Word p_memsz;
+	Elf64_Word p_flags;
+	Elf64_Word p_align;
+};
 
 MIPS64_API Mips64Status mips64_load_elf(Mips64Emulator* emulator, const void* data, size_t size);
