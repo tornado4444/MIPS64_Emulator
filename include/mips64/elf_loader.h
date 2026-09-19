@@ -11,6 +11,15 @@
 #define ELFMAG2 'L'
 #define ELFMAG3 'F'
 
+
+#define ELF64_ST_BIND(i)	((i) >> 4)
+#define ELF64_ST_BIND(i)	((i) &0XF)
+#define ELF64_ST_INFO(b, t) (((b << 4)) + ((t) & 0XF))
+
+
+#define ELF64_R_SYM(i)      ((i) >> 8)
+#define ELF64_R_TYPE(i)     ((unsigned char)(i)
+#define ELF64_R_SYM(i)      (((s)<<8)+(unsigned char)(t))
 /*
 	64-Bit Data Types
 	----------------------------------------------------------------------
@@ -23,11 +32,11 @@
 	-----------------------------------------------------------------------
 */
 
-typedef uint32_t  Elf64_Addr;
-typedef uint16_t  Elf64_Half;
-typedef uint32_t  Elf64_Off;
-typedef int32_t   Elf64_Sword;
-typedef uint32_t  Elf64_Word;
+typedef uint32_t     Elf64_Addr;
+typedef uint16_t     Elf64_Half;
+typedef uint32_t     Elf64_Off;
+typedef signed int   Elf64_Sword;
+typedef uint32_t     Elf64_Word;
 
 /*
 	The architecture of the hardware platform for which the file is created. 
@@ -105,5 +114,94 @@ typedef enum Mips64ElfData {
 	MIPS64_ELF_DATA_LSB = 1,
 	MIPS64_ELF_DATA_MSB = 2
 } Mips64ElfData;
+
+typedef enum Mips64ElfSSI {
+	SHN_UNDEF = 0,
+	SHN_LORESERVE = 0xFF00,
+	SHN_LOPROC = 0xFF00,
+	SHN_HIPROC = 0xFF1F,
+	SHN_ABS = 0xFFF1,
+	SHN_COMMON = 0xFFF2,
+	SHN_HIRESERVE = 0xFFFF
+} Mips64ElfSSI;
+
+
+typedef union Efl64_Shdr {
+	Elf64_Word sh_name;
+	Elf64_Word sh_type;
+
+	enum {
+		SHT_NULL = 0,
+		SHT_PROGBITS = 1,
+		SHT_SYMTAB = 2,
+		SHT_STRTAB = 3,
+		SHT_RELA = 4,
+		SHT_HASH = 5,
+		SHT_DYNAMIC = 6,
+		SHT_NOTE = 7,
+		SHT_NOBITS = 8,
+		SHT_REL = 9,
+		SHT_SHLIB = 10,
+		SHT_DYNSYM = 11,
+		SHT_LOPROC = 0x70000000,
+		SHT_HIPROC = 0x7FFFFFFF,
+		SHT_LOUSER = 0x80000000,
+		SHT_HIUSER = 0xFFFFFFFF
+	} elf_sh_type;
+
+	Elf64_Word sh_flags;
+
+	enum {
+		SHF_WRITE     = 0x1,
+		SHF_ALLOC     = 0x2,
+		SHF_EXECINSTR = 0x4,
+		SHF_MASKPROC  = 0xF0000000
+	} elf_sh_flags;
+
+	Elf64_Addr sh_addr;
+	Elf64_Off  sh_offset;
+	Elf64_Word sh_size;
+	Elf64_Word sh_link;
+	Elf64_Word sh_info;
+	Elf64_Word sh_addralign;
+	Elf64_Word sh_entsize
+} Efl64_Shdr;
+
+typedef struct Elf64_Sym {
+	Elf64_Word    st_name;
+	Elf64_Addr    st_value;
+	Elf64_Word    st_size;
+	unsigned char st_info;
+	unsigned char st_other;
+	Elf64_Half    st_shndx;
+} Elf64_Sym;
+
+typedef enum Elf64_ST_BIND {
+	STB_LOCAL  = 0,
+	STB_GLOBAL = 1,
+	STB_WEAK   = 2,
+	STB_LOPROC = 13,
+	STB_HIPROC = 15
+} Elf64_ST_BIND;
+
+typedef enum Elf64_ST_TYPE {
+	STT_NOTYPE  = 0,
+	STT_OBJECT  = 1,
+	STT_FUNC    = 2,
+	STT_SECTION = 3,
+	STT_FILE    = 4,
+	STT_LOPROC  = 13,
+	STT_HIPROC  = 15
+} Elf64_ST_TYPE;
+
+typedef struct Elf64_Rel {
+	Elf64_Addr r_offset;
+	Elf64_Word r_info;
+} Elf64_Rel;
+typedef struct Elf64_Rela {
+	Elf64_Addr r_offset;
+	Elf64_Word r_info;
+	Elf64_Sword r_addend;
+} Elf64_Rela;
 
 MIPS64_API Mips64Status mips64_load_elf(Mips64Emulator* emulator, const void* data, size_t size);
