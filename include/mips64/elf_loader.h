@@ -336,3 +336,6 @@ typedef struct {
 extern Elf64_Dyn _DYNAMIC[];
 
 MIPS64_API Mips64Status mips64_load_elf(Mips64Emulator* emulator, const void* data, size_t size);
+
+// ---------------------------------HASH TABLE-------------------------------------
+MIPS64_API Mips64Status mips64_hash_table(uint32_t* out_hash, const unsigned char* name);
