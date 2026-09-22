@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "mips64/core.h"
 
@@ -19,7 +20,7 @@
 
 #define ELF64_R_SYM(i)      ((i) >> 8)
 #define ELF64_R_TYPE(i)     ((unsigned char)(i)
-#define ELF64_R_SYM(i)      (((s)<<8)+(unsigned char)(t))
+#define ELF64_R_SYM(i)      (((s) << 8)+(unsigned char)(t))
 
 
 // ---------------------------------Special Sections Name--------------------------
@@ -55,6 +56,19 @@
 #define ELF_LIT8_REGINFO	".lit8.reginfo"
 #define ELF_GPTAB_LIBLIST	".gptab.liblist"
 #define ELF_CONFLICT		".conflict"
+
+/*
+	If the process environment contains a variable named LD_BIND_NOW with a non-null value,
+	the dynamic linker processes all relocation before transferring control to the program:
+	- LD_BIND_NOW = 1;
+	- LD_BIND_NOW = on;
+	- LD_BIND_NOW = off;
+*/
+#define LD_BIND_NOW_apply_1()    setenv("LD_BIND_NOW", "1", 1)
+#define LD_BIND_NOW_apply_0()    unsetenv("LD_BIND_NOW")
+#define LD_BIND_NOW_apply_ON()   setenv("LD_BIND_NOW", "1", 1)
+#define LD_BIND_NOW_apply_OFF()  unsetenv("LD_BIND_NOW")
+
 
 /*
 	64-Bit Data Types
@@ -263,38 +277,62 @@ typedef union Elf64_Phdr {
 	Elf64_Word p_filesz;
 	Elf64_Word p_memsz;
 	Elf64_Word p_flags;
+
+	enum elf_p_flags {
+		PF_X = 0x1,					// Execute
+		PF_W = 0x2,					// Write
+		PF_R = 0x4,					// Read
+		PF_MASKPROC = 0xF0000000	// Unspecified
+	};
+
 	Elf64_Word p_align;
 };
 
 // ------------------------------Dynamic Array Tags------------------------
+/*
+	------------------------------------------------------------------------------------
+	|   NAME    |  VALUE  |   d_un		  |    Executable     |      Shared Object     |  
+	------------------------------------------------------------------------------------
+*/
 typedef enum _DYNAMIC {
-	DT_NULL,
-	DT_NEEDED,
-	DT_PLTRELSZ,
-	DT_PLTGOT,
-	DT_HASH,
-	DT_STRTAB,
-	DT_SYMTAB,
-	DT_RELA,
-	DT_RELASZ,
-	DT_RELAENT,
-	DT_STRSZ,
-	DT_SYMENT,
-	DT_INIT,
-	DT_FINI,
-	DT_SONAME,
-	DT_RPATH,
-	DT_SYMBOLIC,
-	DT_REL,
-	DT_RELSZ,
-	DT_RELENT,
-	DT_PLTREL,
-	DT_DEBUG,
-	DT_TEXTREL,
-	DT_JMPREL,
-	DT_BIND_NOW,
-	DT_LOPROC,
-	DT_HIPROC,
+	DT_NULL		= 0,
+	DT_NEEDED	= 1,
+	DT_PLTRELSZ = 2,
+	DT_PLTGOT	= 3,
+	DT_HASH		= 4,
+	DT_STRTAB	= 5,
+	DT_SYMTAB	= 6,
+	DT_RELA		= 7,
+	DT_RELASZ	= 8,
+	DT_RELAENT	= 9,
+	DT_STRSZ	= 10,
+	DT_SYMENT	= 11,
+	DT_INIT		= 12,
+	DT_FINI		= 13,
+	DT_SONAME	= 14,
+	DT_RPATH	= 15,
+	DT_SYMBOLIC = 16,
+	DT_REL		= 17,
+	DT_RELSZ	= 18,
+	DT_RELENT	= 19,
+	DT_PLTREL	= 20,
+	DT_DEBUG	= 21,
+	DT_TEXTREL	= 22,
+	DT_JMPREL	= 23,
+	DT_BIND_NOW = 24,
+	DT_LOPROC	= 0x70000000,
+	DT_HIPROC	= 0x7FFFFFFF,
 } _DYNAMIC;
+
+typedef struct {
+	Elf64_Sword	d_tag;
+	union {
+		Elf64_Word d_val;
+		Elf64_Addr d_ptr;
+	} d_un;
+
+} Elf64_Dyn;
+
+extern Elf64_Dyn _DYNAMIC[];
 
 MIPS64_API Mips64Status mips64_load_elf(Mips64Emulator* emulator, const void* data, size_t size);
