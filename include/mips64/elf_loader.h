@@ -335,6 +335,27 @@ typedef struct {
 
 extern Elf64_Dyn _DYNAMIC[];
 
+
+// ---------------------------------------------------MIPS64------------------------------------
+typedef enum Mips64RelocationTypes {
+	R_MIPS_NONE		= 0,  
+	R_MIPS_16		= 1,
+	R_MIPS_32		= 2,  
+	R_MIPS_REL32	= 3,
+	R_MIPS_26		= 4,  
+	R_MIPS_HI16		= 5,  
+	R_MIPS_LO16		= 6,  
+	R_MIPS_GPREL16	= 7,
+	R_MIPS_LITERAL	= 8,
+	R_MIPS_GOT16	= 9,
+	R_MIPS_PC16		= 10,
+	R_MIPS_CALL16	= 11,
+	R_MIPS_GPREL32	= 12,
+	R_MIPS_64		= 18
+} Mips64RelocationTypes;
+
+extern Elf64_Addr _GLOBAL_OFFSET_TABLE_[];
+
 MIPS64_API Mips64Status mips64_load_elf(Mips64Emulator* emulator, const void* data, size_t size);
 
 // ---------------------------------HASH TABLE-------------------------------------
