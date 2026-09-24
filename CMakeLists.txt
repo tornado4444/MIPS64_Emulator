@@ -25,6 +25,7 @@ set(HEADER_LIST
 	include/mips64/decode.h
 	include/mips64/execute.h
 	include/mips64/elf_loader.h
+	include/mips64/jit_compiler_x64.h
 )
 
 # ONLY FOR MSVC
@@ -43,9 +44,10 @@ target_sources(MIPS64_Core
 		src/mips64/decode.c
 		src/mips64/execute.c
 		src/mips64/elf_loader.c
+		src/mips64/jit_compiler_x64.c
 	PUBLIC
 		${HEADER_LIST}
- "include/mips64/elf_loader.h" "src/mips64/elf_loader.c")
+)
 
 target_include_directories(MIPS64_Core
 	PUBLIC

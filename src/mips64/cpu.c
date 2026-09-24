@@ -3,7 +3,6 @@
 #include "mips64/cpu.h"
 #include "mips64/decode.h"
 
-// TODO IN FUTURE RELEASE ELF AND JIT!!!!!!!
 Mips64Status mips64_cpu_reset(Mips64CPU* cpu, uint64_t reset_pc) {
 	if (cpu == NULL) {
 		return;
