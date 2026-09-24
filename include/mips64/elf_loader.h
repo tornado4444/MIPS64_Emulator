@@ -1,362 +1,128 @@
 #pragma once
 
 #include <stdint.h>
-#include <stdlib.h>
+#include <stddef.h>
 
 #include "mips64/core.h"
 
 #define EI_NIDENT			16
 
-#define ELFMAG0				0x7f
+#define ELFMAG0				0x7F
 #define ELFMAG1				'E'
 #define ELFMAG2				'L'
 #define ELFMAG3				'F'
 
+typedef uint64_t Elf64_Addr;
+typedef uint64_t Elf64_Off;
 
-#define ELF64_ST_BIND(i)	((i) >> 4)
-#define ELF64_ST_BIND(i)	((i) &0XF)
-#define ELF64_ST_INFO(b, t) (((b << 4)) + ((t) & 0XF))
+typedef uint16_t Elf64_Half;
 
+typedef uint32_t Elf64_Word;
+typedef int32_t  Elf64_Sword;
 
-#define ELF64_R_SYM(i)      ((i) >> 8)
-#define ELF64_R_TYPE(i)     ((unsigned char)(i)
-#define ELF64_R_SYM(i)      (((s) << 8)+(unsigned char)(t))
+typedef uint64_t Elf64_Xword;
+typedef int64_t  Elf64_Sxword;
 
+typedef enum Mips64ElfIdentIndex {
+    EI_MAG0       = 0,
+    EI_MAG1       = 1,
+    EI_MAG2       = 2,
+    EI_MAG3       = 3,
 
-// ---------------------------------Special Sections Name--------------------------
-#define ELF_BSS				".bss"
-#define ELF_COMMENT			".comment"
-#define ELF_DATA			".data"
-#define ELF_DATA1			".data1"
-#define ELF_DYNAMIC			".dynamic"
-#define ELF_DYNSTR			".dynstr"
-#define ELF_DYNSYM			".dynsym"
-#define ELF_FINI			".fini"
-#define ELF_GOT				".got"
-#define ELF_HASH			".hash"
-#define ELF_INIT			".init"
-#define ELF_INTERP			".interp"
-#define ELF_LINE			".line"
-#define ELF_NOTE			".note"
-#define ELF_PLT			    ".plt"
-#define ELF_REL				".relname"
-#define ELF_RELA			".relaname"
-#define ELF_RODATA			".rodata"
-#define ELF_RODATA1			".rodata1"
-#define ELF_SHSTRTAB		".shstrtab"
-#define ELF_STRTAB			".strtab"
-#define ELF_SYMTAB			".symtab"
-#define ELF_TEXT			".text"
-
-// ---------------------------------Pre-existing Extensions--------------------------
-#define DT_JMP_REL			23
-
-#define ELF_SDATA_TDESC     ".sdata.tdesc"
-#define ELF_SBSS_LIT4		".sbss.lit4"
-#define ELF_LIT8_REGINFO	".lit8.reginfo"
-#define ELF_GPTAB_LIBLIST	".gptab.liblist"
-#define ELF_CONFLICT		".conflict"
-
-/*
-	If the process environment contains a variable named LD_BIND_NOW with a non-null value,
-	the dynamic linker processes all relocation before transferring control to the program:
-	- LD_BIND_NOW = 1;
-	- LD_BIND_NOW = on;
-	- LD_BIND_NOW = off;
-*/
-#define LD_BIND_NOW_apply_1()    setenv("LD_BIND_NOW", "1", 1)
-#define LD_BIND_NOW_apply_0()    unsetenv("LD_BIND_NOW")
-#define LD_BIND_NOW_apply_ON()   setenv("LD_BIND_NOW", "1", 1)
-#define LD_BIND_NOW_apply_OFF()  unsetenv("LD_BIND_NOW")
-
-
-/*
-	64-Bit Data Types
-	----------------------------------------------------------------------
-	|   NAME        |  Size  |   Alignment   |           PURPOSE         |
-	|	Elf64_Addr  |   4    |      4        |  Unsigned program address |
-	|	Elf64_Half	|	2	 |		2		 |  Unsigned medium integer  |
-	|	Elf64_Off	|	4	 |		4		 |	Unsigned file offset	 |
-	|	Elf64_Sword	|	4	 |		4		 |	Signed large integer	 |
-	|	Elf64_Word	|	4	 |		4		 |	Unsigned large integer	 |
-	-----------------------------------------------------------------------
-*/
-
-typedef uint32_t			Elf64_Addr;
-typedef uint16_t			Elf64_Half;
-typedef uint32_t			Elf64_Off;
-typedef signed int			Elf64_Sword;
-typedef uint32_t			Elf64_Word;
-
-/*
-	The architecture of the hardware platform for which the file is created. 
-	The most important thing to understand is that there is a difference between the instructions in the ELF header file.
-	For MIPS64 instruction been(but also it's can be for other Mips):
-	---------------------------------------
-	|   NAME    |  VALUE  |   Description |  
-	|	EM_MIPS |   0x08  |   MIPS        |
-	---------------------------------------
-	But not to be confused with MIPS R3000 Little-endian:
-	-------------------------------------------------------
-	|   NAME    |  VALUE  |	      Description              |
-	|	EM_MIPS |   0x0À  |   R3000 Little-endian          |
-	--------------------------------------------------------
-*/
-
-
-typedef union {
-	unsigned char e_ident[EI_NIDENT];
-
-	Elf64_Half    e_type;
-	Elf64_Half    e_machine;
-	Elf64_Word    e_version;
-	Elf64_Addr    e_entry;
-	Elf64_Off     e_phoff;
-	Elf64_Off	  e_shoff;
-	Elf64_Word	  e_flags;
-	Elf64_Half    e_ehsize;
-	Elf64_Half    e_phentsize;
-	Elf64_Half    e_phnum;
-	Elf64_Half    e_shentsize;
-	Elf64_Half    e_shnum;
-	Elf64_Half    e_shstrndx;
-
-	struct {
-		uint32_t magic;
-		uint8_t  elf_class;
-		uint8_t  data_encoding;
-		uint8_t  version;
-		uint8_t  os_abi;
-		uint8_t  abi_version;
-		uint8_t padding[7];
-	} fields;
-} Elf64_Ehdr;
-
-typedef enum Mips64_ELF_TYPE_MIPS {
-	ET_NONE = 0, ET_REL = 1, ET_EXEC = 2,
-	ET_DYN = 3,  ET_CORE = 4, ET_LOPROC = 0x00FF,
-	ET_HIPROC = 0xFFFF
-} Mips64ElfE_Type;
-
-typedef enum MIPS64_ELF_MACHINE_MIPS {
-	EM_MIPS = 0x08
-} MIPS64_ELF_MACHINE_MIPS;
-
-typedef enum MIPS64_ELF_VERSION_MIPS {
-	EV_NONE = 0,
-	EV_CURRENT = 1
-} MIPS64_ELF_VERSION_MIPS;
-
-typedef enum MIPS64_ELF_Ident_Indexes {
-	EI_MAG0 = 0, EI_MAG1 = 1, EI_MAG2 = 2,
-	EI_MAG3 = 3, EI_CLASS = 4, EI_DATA = 5,
-	EI_VERSION = 6, EI_VERSION = 7 // EI_NIDENT = 16 we declared it as a macro #define
-} MIPS64_ELF_Ident_Indexes;
+    EI_CLASS      = 4,
+    EI_DATA       = 5,
+    EI_VERSION    = 6,
+    EI_OSABI      = 7,
+    EI_ABIVERSION = 8,
+    EI_PAD        = 9
+} Mips64ElfIdentIndex;
 
 typedef enum Mips64ElfClass {
-	MIPS64_ELF_CLASS_NONE = 0,
-	MIPS64_ELF_CLASS_32   = 1,
-	MIPS64_ELF_CLASS_64   = 2
+    ELFCLASSNONE = 0,
+    ELFCLASS32   = 1,
+    ELFCLASS64   = 2
 } Mips64ElfClass;
 
 typedef enum Mips64ElfData {
-	MIPS64_ELF_DATA_NONE  = 0,
-	MIPS64_ELF_DATA_LSB   = 1,
-	MIPS64_ELF_DATA_MSB   = 2
+    ELFDATANONE = 0,
+    ELFDATA2LSB = 1,
+    ELFDATA2MSB = 2
 } Mips64ElfData;
 
-typedef enum Mips64ElfSSI {
-	SHN_UNDEF = 0,
-	SHN_LORESERVE = 0xFF00,
-	SHN_LOPROC = 0xFF00,
-	SHN_HIPROC = 0xFF1F,
-	SHN_ABS = 0xFFF1,
-	SHN_COMMON = 0xFFF2,
-	SHN_HIRESERVE = 0xFFFF
-} Mips64ElfSSI;
+typedef enum Mips64ElfType {
+    ET_NONE = 0,
+    ET_REL  = 1,
+    ET_EXEC = 2,
+    ET_DYN  = 3,
+    ET_CORE = 4
+} Mips64ElfType;
 
+typedef enum Mips64ElfMachine {
+    EM_MIPS = 8
+} Mips64ElfMachine;
 
-typedef union Efl64_Shdr {
-	Elf64_Word sh_name;
-	Elf64_Word sh_type;
+typedef struct Elf64_Ehdr {
+    unsigned char e_ident[EI_NIDENT];
 
-	enum {
-		SHT_NULL	 = 0,
-		SHT_PROGBITS = 1,
-		SHT_SYMTAB   = 2,
-		SHT_STRTAB   = 3,
-		SHT_RELA     = 4,
-		SHT_HASH     = 5,
-		SHT_DYNAMIC  = 6,
-		SHT_NOTE     = 7,
-		SHT_NOBITS   = 8,
-		SHT_REL      = 9,
-		SHT_SHLIB    = 10,
-		SHT_DYNSYM   = 11,
-		SHT_LOPROC   = 0x70000000,
-		SHT_HIPROC   = 0x7FFFFFFF,
-		SHT_LOUSER   = 0x80000000,
-		SHT_HIUSER   = 0xFFFFFFFF
-	} elf_sh_type;
+    Elf64_Half e_type;
+    Elf64_Half e_machine;
 
-	Elf64_Word sh_flags;
+    Elf64_Word e_version;
 
-	enum {
-		SHF_WRITE     = 0x1,
-		SHF_ALLOC     = 0x2,
-		SHF_EXECINSTR = 0x4,
-		SHF_MASKPROC  = 0xF0000000
-	} elf_sh_flags;
+    Elf64_Addr e_entry;
 
-	Elf64_Addr sh_addr;
-	Elf64_Off  sh_offset;
-	Elf64_Word sh_size;
-	Elf64_Word sh_link;
-	Elf64_Word sh_info;
-	Elf64_Word sh_addralign;
-	Elf64_Word sh_entsize
-} Efl64_Shdr;
+    Elf64_Off e_phoff;
+    Elf64_Off e_shoff;
 
-typedef struct Elf64_Sym {
-	Elf64_Word    st_name;
-	Elf64_Addr    st_value;
-	Elf64_Word    st_size;
-	unsigned char st_info;
-	unsigned char st_other;
-	Elf64_Half    st_shndx;
-} Elf64_Sym;
+    Elf64_Word e_flags;
 
-typedef enum Elf64_ST_BIND {
-	STB_LOCAL  = 0,
-	STB_GLOBAL = 1,
-	STB_WEAK   = 2,
-	STB_LOPROC = 13,
-	STB_HIPROC = 15
-} Elf64_ST_BIND;
+    Elf64_Half e_ehsize;
 
-typedef enum Elf64_ST_TYPE {
-	STT_NOTYPE  = 0,
-	STT_OBJECT  = 1,
-	STT_FUNC    = 2,
-	STT_SECTION = 3,
-	STT_FILE    = 4,
-	STT_LOPROC  = 13,
-	STT_HIPROC  = 15
-} Elf64_ST_TYPE;
+    Elf64_Half e_phentsize;
+    Elf64_Half e_phnum;
 
-typedef struct Elf64_Rel {
-	Elf64_Addr r_offset;
-	Elf64_Word r_info;
-} Elf64_Rel;
+    Elf64_Half e_shentsize;
+    Elf64_Half e_shnum;
 
-typedef struct Elf64_Rela {
-	Elf64_Addr  r_offset;
-	Elf64_Word  r_info;
-	Elf64_Sword r_addend;
-} Elf64_Rela;
+    Elf64_Half e_shstrndx;
+} Elf64_Ehdr;
 
-// ------------------------------PROGRAM HEADER------------------------
-typedef union Elf64_Phdr {
-	Elf64_Word p_type;
+typedef enum Mips64ElfProgramType {
+    PT_NULL     = 0,
+    PT_LOAD     = 1,
+    PT_DYNAMIC  = 2,
+    PT_INTERP   = 3,
+    PT_NOTE     = 4,
+    PT_SHLIB    = 5,
+    PT_PHDR     = 6
+} Mips64ElfProgramType;
 
-	enum elf_p_type {
-		PT_NULL    = 0,
-		PT_LOAD    = 1,
-		PT_DYNAMIC = 2,
-		PT_INTERP  = 3,
-		PT_NOTE    = 4,
-		PT_SHLIB   = 5,
-		PT_PHDR    = 6,
-		PT_LOPROC  = 0x70000000,
-		PT_HIPROC  = 0x7FFFFFFF
-	} elf_p_type;
+typedef enum Mips64ElfProgramFlags {
+    PF_X = 0x1,
+    PF_W = 0x2,
+    PF_R = 0x4
+} Mips64ElfProgramFlags;
 
-	Elf64_Off  p_offset;
-	Elf64_Addr p_vaddr;
-	Elf64_Addr p_paddr;
-	Elf64_Word p_filesz;
-	Elf64_Word p_memsz;
-	Elf64_Word p_flags;
+typedef struct Elf64_Phdr {
+    Elf64_Word  p_type;
+    Elf64_Word  p_flags;
 
-	enum elf_p_flags {
-		PF_X = 0x1,					// Execute
-		PF_W = 0x2,					// Write
-		PF_R = 0x4,					// Read
-		PF_MASKPROC = 0xF0000000	// Unspecified
-	};
+    Elf64_Off   p_offset;
 
-	Elf64_Word p_align;
-};
+    Elf64_Addr  p_vaddr;
+    Elf64_Addr  p_paddr;
 
-// ------------------------------Dynamic Array Tags------------------------
-/*
-	------------------------------------------------------------------------------------
-	|   NAME    |  VALUE  |   d_un		  |    Executable     |      Shared Object     |  
-	------------------------------------------------------------------------------------
-*/
-typedef enum _DYNAMIC {
-	DT_NULL		= 0,
-	DT_NEEDED	= 1,
-	DT_PLTRELSZ = 2,
-	DT_PLTGOT	= 3,
-	DT_HASH		= 4,
-	DT_STRTAB	= 5,
-	DT_SYMTAB	= 6,
-	DT_RELA		= 7,
-	DT_RELASZ	= 8,
-	DT_RELAENT	= 9,
-	DT_STRSZ	= 10,
-	DT_SYMENT	= 11,
-	DT_INIT		= 12,
-	DT_FINI		= 13,
-	DT_SONAME	= 14,
-	DT_RPATH	= 15,
-	DT_SYMBOLIC = 16,
-	DT_REL		= 17,
-	DT_RELSZ	= 18,
-	DT_RELENT	= 19,
-	DT_PLTREL	= 20,
-	DT_DEBUG	= 21,
-	DT_TEXTREL	= 22,
-	DT_JMPREL	= 23,
-	DT_BIND_NOW = 24,
-	DT_LOPROC	= 0x70000000,
-	DT_HIPROC	= 0x7FFFFFFF,
-} _DYNAMIC;
+    Elf64_Xword p_filesz;
+    Elf64_Xword p_memsz;
 
-typedef struct {
-	Elf64_Sword	d_tag;
-	union {
-		Elf64_Word d_val;
-		Elf64_Addr d_ptr;
-	} d_un;
-
-} Elf64_Dyn;
-
-extern Elf64_Dyn _DYNAMIC[];
-
-
-// ---------------------------------------------------MIPS64------------------------------------
-typedef enum Mips64RelocationTypes {
-	R_MIPS_NONE		= 0,  
-	R_MIPS_16		= 1,
-	R_MIPS_32		= 2,  
-	R_MIPS_REL32	= 3,
-	R_MIPS_26		= 4,  
-	R_MIPS_HI16		= 5,  
-	R_MIPS_LO16		= 6,  
-	R_MIPS_GPREL16	= 7,
-	R_MIPS_LITERAL	= 8,
-	R_MIPS_GOT16	= 9,
-	R_MIPS_PC16		= 10,
-	R_MIPS_CALL16	= 11,
-	R_MIPS_GPREL32	= 12,
-	R_MIPS_64		= 18
-} Mips64RelocationTypes;
-
-extern Elf64_Addr _GLOBAL_OFFSET_TABLE_[];
+    Elf64_Xword p_align;
+} Elf64_Phdr;
 
 MIPS64_API Mips64Status mips64_load_elf(Mips64Emulator* emulator, const void* data, size_t size);
 
 // ---------------------------------HASH TABLE-------------------------------------
 MIPS64_API Mips64Status mips64_hash_table(uint32_t* out_hash, const unsigned char* name);
+
+static uint16_t elf_read_u16(const uint8_t* data, Mips64ElfData* endian);
+static uint32_t elf_read_u32(const uint8_t* data, Mips64ElfData* endian);
+static uint64_t elf_read_u64(const uint8_t* data, Mips64ElfData* endian);

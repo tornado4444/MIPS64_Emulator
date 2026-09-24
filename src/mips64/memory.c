@@ -248,7 +248,6 @@ Mips64MemoryStatus mips64_memory_write64(Memory* mem, uint64_t address, uint64_t
 		for (uint32_t i = 0; i < 8; ++i) {
 			mem->memory[address + i] = (uint8_t) (value >> ((7u - i) * 8u)) & UINT64_C(0xFF);
 		}
-
 	}
 
 	return MIPS64_MEMORY_OK;
