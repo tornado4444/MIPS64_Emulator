@@ -37,5 +37,35 @@
 	void* mmap(void*, size_t, int, int, int, int64_t);
 	int munmap(void*, size_t);
 	int mprotect(void*, size_t, int);
+
+	#define RTLD_LAZY	0x1
+	#define RTLD_GLOBAL	0x8
+	void* dlsym(void* handle, const char* symbol);
+	void* dlopen(const char* filename, int flag);
+	int dlclose(void* handle);
 #endif
+
+#elif _WIN32
+	#include <windows.h>
+	#include <memoryapi.h>	
+#else
+	#include <sys/mman.h>
+	#include <dlfcn.h>
+	#ifndef MAP_ANON
+		#define MAP_ANON 0x1000
+	#endif
 #endif
+
+void x64_encode_rex(uint8_t* buffer, int dest, int src, int op64) {
+	buffer[0] = (dest > 0x7) | ((src > 0x7) << 2) | (op64 << 3) | (0x40);
+}
+
+void x64_encode_modrm(uint8_t* buffer, int dest, int src, int mod) {
+	buffer[0] = (dest & 0x7) | ((src & 0x7) << 3) | (mod << 6);
+}
+
+void x64_encode(uint8_t* buffer, int dest, int src, int i, int mod, int op64)
+{
+	x64_encode_rex(buffer, dest, src, op64);
+	x64_encode_modrm(buffer + i, dest, src, mod);
+}
