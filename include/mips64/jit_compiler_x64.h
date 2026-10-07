@@ -102,6 +102,8 @@ void x8664_encode(uint8_t* buffer, int dest, int src, int i, int mod, int op64)
 #define R14 14
 #define R15 15
 
+// This register name mapping was created for Intel Architecture(32/64 bit)
+
 #define XMM0  0
 #define XMM1  1
 #define XMM2  2
@@ -305,6 +307,111 @@ void x8664_encode(uint8_t* buffer, int dest, int src, int i, int mod, int op64)
 struct JITParsing {
 	uint8_t*  buffer;
 	uint8_t** info1;
-	uint16_t* unfo2;
+	uint16_t* info2;
 	uint16_t* i1;
 };
+
+struct JITState {
+	struct JITParsing p;
+	uint8_t** info1;
+	uint8_t** info2;
+	void* buffer;
+	int buffer_size;
+};
+
+// REGISTERS
+#define JIT_R0 -1 // always zero
+#ifdef _WIN32
+#define JIT_R1 R10 // volatile
+#define JIT_R2 R11 // volatile
+#else
+#define JIT_R1 R8 // volatile
+#define JIT_R2 R9 // volatile
+#endif
+#define JIT_R3 RBX // callee must save
+#define JIT_R4 R12 // callee must save
+#define JIT_R5 R13 // callee must save
+#define JIT_R6 R14 // callee must save
+#define JIT_R7 R15 // callee must save
+
+#define JIT_RE RAX // return (very volatile (used internally), use just before calling JIT_RETURN)
+#define JIT_SP RSP // stack pointer
+
+// arguments
+#define JIT_A1 RA1
+#define JIT_A2 RA2
+#define JIT_A3 RA3
+#define JIT_A4 RA4
+
+// float registers (all volatile)
+#define JIT_RF0  XMM0 // arg1, return
+#define JIT_RF1  XMM1 // arg2
+#define JIT_RF2  XMM2 // arg3
+#define JIT_RF3  XMM3 // arg4
+#define JIT_RF4  XMM4
+#define JIT_RF5  XMM5
+#define JIT_RF6  XMM6
+#define JIT_RF7  XMM7
+#define JIT_RF8  XMM8
+#define JIT_RF9  XMM9
+#define JIT_RF10 XMM10
+#define JIT_RF11 XMM11
+#define JIT_RF12 XMM12
+#define JIT_RF13 XMM13
+#define JIT_RF14 XMM14
+#define JIT_RF15 XMM15
+
+#define JIT__INFO(p)\
+p->info1[0] = p->buffer;\
+p->info1++;\
+p->i1++;
+
+#define JIT__INFO2(p)\
+p->info2[0] = p->i1;\
+p->info2++;
+
+// instructions
+void JIT_LOAD32(struct JITParsing* p, int d, int s, int o);
+void JIT_STORE32(struct JITParsing* p, int d, int o, int s);
+void JIT_LOAD64(struct JITParsing* p, int d, int s, int o);
+void JIT_STORE64(struct JITParsing* p, int d, int o, int s);
+void JIT_ADD(struct JITParsing* p, int d, int s, int t);
+void JIT_ADDI(struct JITParsing* p, int d, int s, int i);
+void JIT_SUB(struct JITParsing* p, int d, int s, int t);
+void JIT_MUL(struct JITParsing* p, int d, int s, int t);
+void JIT_DIV(struct JITParsing* p, int d, int s, int t);
+void JIT_SHIFTL(struct JITParsing * p, int d, int s, int t);
+void JIT_SHIFTR(struct JITParsing * p, int d, int s, int t);
+void JIT_SHIFTLI(struct JITParsing* p, int d, int s, int i);
+void JIT_SHIFTRI(struct JITParsing* p, int d, int s, int i);
+void JIT_AND(struct JITParsing* p, int d, int s, int t);
+void JIT_OR(struct JITParsing* p, int d, int s, int t);
+void JIT_XOR(struct JITParsing* p, int d, int s, int t);
+void JIT_LESS(struct JITParsing* p, int d, int s, int t);
+void JIT_JUMP(struct JITParsing* p, int o);
+void JIT_BRANCH(struct JITParsing* p, int s, int t, int o);
+void JIT_NBRANCH(struct JITParsing* p, int s, int t, int o);
+void JIT_CALL(struct JITParsing* p, int o);
+void JIT_CALLEX(struct JITParsing* p, int s);
+void JIT_RETURN(struct JITParsing* p);
+
+void JIT_LOADF(struct JITParsing* p, int d, int s, int o);
+void JIT_STOREF(struct JITParsing* p, int d, int o, int s);
+void JIT_ITOF(struct JITParsing* p, int d, int s);
+void JIT_FTOI(struct JITParsing* p, int d, int s);
+void JIT_ADDF(struct JITParsing* p, int d, int s, int t);
+void JIT_SUBF(struct JITParsing* p, int d, int s, int t);
+void JIT_MULF(struct JITParsing* p, int d, int s, int t);
+void JIT_DIVF(struct JITParsing* p, int d, int s, int t);
+void JIT_LESSF(struct JITParsing* p, int d, int s, int t);
+void JIT_MINF(struct JITParsing* p, int d, int s, int t);
+void JIT_MAXF(struct JITParsing* p, int d, int s, int t);
+
+void JIT_LOADF4(struct JITParsing* p, int d, int s, int o);
+void JIT_STOREF4(struct JITParsing* p, int d, int o, int s);
+void JIT_ADDF4(struct JITParsing* p, int d, int s, int t);
+void JIT_SUBF4(struct JITParsing* p, int d, int s, int t);
+void JIT_MULF4(struct JITParsing* p, int d, int s, int t);
+void JIT_DIVF4(struct JITParsing* p, int d, int s, int t);
+void JIT_MINF4(struct JITParsing* p, int d, int s, int t);
+void JIT_MAXF4(struct JITParsing* p, int d, int s, int t);
