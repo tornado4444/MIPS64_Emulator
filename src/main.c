@@ -7,6 +7,7 @@
 #include "mips64/memory.h"
 #include "mips64/decode.h"
 #include "mips64/execute.h"
+#include "mips64/jit_compiler_x64.h"
 
 static int start_program(void) {
 	/*
