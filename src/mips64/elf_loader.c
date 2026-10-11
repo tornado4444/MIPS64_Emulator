@@ -31,14 +31,14 @@ Mips64Status mips64_load_elf(Mips64Emulator* emulator, const void* data, size_t 
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
 
-	Elf64_Half e_type = elf_read_u16(bytes + 16, endian);
-	Elf64_Half e_machine = elf_read_u16(bytes + 18, endian);
-	Elf64_Half e_version = elf_read_u32(bytes + 20, endian);
-	Elf64_Half e_entry = elf_read_u64(bytes + 24, endian);
-	Elf64_Half e_phoff = elf_read_u32(bytes + 32, endian);
-	Elf64_Half e_ehsize = elf_read_u16(bytes + 52, endian);
-	Elf64_Half e_phentsize = elf_read_u16(bytes + 54, endian);
-	Elf64_Half e_phnum = elf_read_u16(bytes + 56, endian);
+	uint16_t e_type = elf_read_u16(bytes + 16, endian);
+	uint16_t e_machine = elf_read_u16(bytes + 18, endian);
+	uint32_t e_version = elf_read_u32(bytes + 20, endian);
+	uint64_t e_entry = elf_read_u64(bytes + 24, endian);
+	uint32_t e_phoff = elf_read_u32(bytes + 32, endian);
+	uint16_t e_ehsize = elf_read_u16(bytes + 52, endian);
+	uint16_t e_phentsize = elf_read_u16(bytes + 54, endian);
+	uint16_t e_phnum = elf_read_u16(bytes + 56, endian);
 
 	if (e_type != ET_EXEC) {
 		return MIPS64_STATUS_INVALID_ARGUMENT;
@@ -90,7 +90,7 @@ Mips64Status mips64_hash_table(uint32_t* out_hash, const unsigned char* name) {
 	return MIPS64_STATUS_OK;
 }
 
-static uint16_t elf_read_u16(const uint8_t* data, Mips64ElfData* endian) {
+static uint16_t elf_read_u16(const uint8_t* data, Mips64ElfData endian) {
 	if (endian == ELFDATA2LSB) {
 		return (uint16_t)data[0] | ((uint16_t)data[1] << 8);
 	}
@@ -98,7 +98,7 @@ static uint16_t elf_read_u16(const uint8_t* data, Mips64ElfData* endian) {
 	return (uint16_t)data[0] << 8 | ((uint16_t)data[1]);
 }
 
-static uint32_t elf_read_u32(const uint8_t* data, Mips64ElfData* endian) {
+static uint32_t elf_read_u32(const uint8_t* data, Mips64ElfData endian) {
 	if (endian == ELFDATA2LSB) {
 		return (uint32_t)data[0] |
 			   (uint32_t)data[1] << 8 |
@@ -112,7 +112,7 @@ static uint32_t elf_read_u32(const uint8_t* data, Mips64ElfData* endian) {
 		   (uint32_t)data[3];
 }
 
-static uint64_t elf_read_u64(const uint8_t* data, Mips64ElfData* endian) {
+static uint64_t elf_read_u64(const uint8_t* data, Mips64ElfData endian) {
 	uint64_t value = 0;
 
 	if (endian == ELFDATA2LSB) {

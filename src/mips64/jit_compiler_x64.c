@@ -347,7 +347,7 @@ void JIT_RETURN(struct JITParsing* p) {
 }
 
 void JIT_LOADF(struct JITParsing* p, int d, int s, int o) {
-	JIT__INFO(p)
+	JIT__INFO(*p)
 		if (d != JIT_R0 && s != JIT_R0) {
 
 			if (s == JIT_SP) {

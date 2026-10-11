@@ -123,6 +123,6 @@ MIPS64_API Mips64Status mips64_load_elf(Mips64Emulator* emulator, const void* da
 // ---------------------------------HASH TABLE-------------------------------------
 MIPS64_API Mips64Status mips64_hash_table(uint32_t* out_hash, const unsigned char* name);
 
-static uint16_t elf_read_u16(const uint8_t* data, Mips64ElfData* endian);
-static uint32_t elf_read_u32(const uint8_t* data, Mips64ElfData* endian);
-static uint64_t elf_read_u64(const uint8_t* data, Mips64ElfData* endian);
+static uint16_t elf_read_u16(const uint8_t* data, Mips64ElfData endian);
+static uint32_t elf_read_u32(const uint8_t* data, Mips64ElfData endian);
+static uint64_t elf_read_u64(const uint8_t* data, Mips64ElfData endian);

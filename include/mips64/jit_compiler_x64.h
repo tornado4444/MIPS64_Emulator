@@ -314,7 +314,7 @@ struct JITParsing {
 struct JITState {
 	struct JITParsing p;
 	uint8_t** info1;
-	uint8_t** info2;
+	uint16_t* info2;
 	void* buffer;
 	int buffer_size;
 };

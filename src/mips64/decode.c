@@ -10,6 +10,7 @@ void mips64_decode_instruction(uint32_t raw, Mips64Decoded* out_instruction) {
 	out_instruction->shift_amount = (uint8_t)(raw >> 6) & UINT32_C(0x1F);
 	out_instruction->function = (uint8_t)(raw & UINT32_C(0x3F));
 	out_instruction->immediate = (uint16_t)(raw & UINT32_C(0xFFF));
+
 	out_instruction->target = raw & UINT32_C(0x03FFFFFFFF);
 }
 
