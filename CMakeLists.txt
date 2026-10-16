@@ -1,6 +1,8 @@
 ﻿cmake_minimum_required(VERSION 3.20) 
 
-project(Mips64_Emulator VERSION 0.1.0 DESCRIPTION "Making MIPS64_Emulator" LANGUAGES C)
+project(Mips64_Emulator VERSION 0.1.0 DESCRIPTION "Making MIPS64_Emulator" LANGUAGES C CXX)
+set(CMAKE_C_STANDARD 23)
+set(CMAKE_CXX_STANDARD 23)
 # FOR ME
 # Things you can set on targets
 #    target_link_libraries: Other targets; can also pass library names directly
@@ -13,10 +15,12 @@ project(Mips64_Emulator VERSION 0.1.0 DESCRIPTION "Making MIPS64_Emulator" LANGU
 #    target_sources: Add source files
 add_library(MIPS64_Core SHARED)
 
-# TODO Make this more functaonality
-set_target_properties(MIPS64_Core PROPERTIES
-    WINDOWS_EXPORT_ALL_SYMBOLS ON
-)
+# TODO Make this more functaonality(for GCC and Clang)
+if(MSVC)
+	set_target_properties(MIPS64_Core PROPERTIES
+		WINDOWS_EXPORT_ALL_SYMBOLS ON
+	)
+endif()
 
 set(HEADER_LIST
 	include/mips64/core.h
