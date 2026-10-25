@@ -7,7 +7,6 @@
 	This is temporary, since it is just for testing,
 	there are few instructions and in fact it will take a long time and be difficult to do at first,
 	then I will change it. In general, this will need to be transferred to decode.c when it is available
-	- Ten instructions;
 	- Multiple formats;
 	- Operation code tables;
 	- Disassembler;
@@ -29,32 +28,30 @@ typedef struct Mips64Decoded {
 	uint8_t function;
 
 	uint16_t immediate;
-
+	uint16_t offset;
 	uint32_t target;
 } Mips64Decoded;
 
 typedef enum Mips64Opcode {
-	/* TODO
-		* It's a base opcodes instructions, in future need add more:
-		* - ADD 
-		* - ADDU
-		* - ORI
-		* - ANDI
-		* - XORI
-		* - LUI
-		* - DSUBU
-		* - SLT
-		* - SLTU
-		IN FUTURE NEED BEEN TO TRY THIS OUT, OTHERWISE THERE WILL TOO MANY INSTRUCTIONS!!! NEED FIX THAT MANNNNNN! DAMN, DON'T HAVE MUCH TIME
-	*/
-	MIPS64_OPCODE_SPECIAL = 0x00,
-	MIPS64_OPCODE_DADDIU  = 0x19,
-	MIPS64_OPCODE_ADD	  = 0x20,
-	MIPS64_OPCODE_ADDU	  = 0x21
+	MIPS64_OPCODE_SPECIAL   = 0x00,
+	MIPS64_OPCODE_BEQ		= 0x04,
+	MIPS64_OPCODE_BNE		= 0x05,
+	MIPS64_OPCODE_BLEZ		= 0x06,
+	MIPS64_OPCODE_BGTZ		= 0x07,
+	MIPS64_OPCODE_ADDI      = 0x08,
+	MIPS64_OPCODE_ADDIU     = 0x09,
+	MIPS64_OPCODE_DADDIU    = 0x19,
+	MIPS64_OPCODE_BEQL		= 0x20, // WARNING: Removed for Release 6
+	MIPS64_OPCODE_BLEZL		= 0x22, // WARNING: Removed for Release 6
+	MIPS64_OPCODE_BGTZL		= 0x23, // WARNING: Removed for Release 6
+	MIPS64_OPCODE_BC		= 0x32, // WARNING: BC for Release 6
+	MIPS64_OPCODE_BALC		= 0x3A, // WARNING: BALC for Release 6
 } Mips64Opcode;
 
 typedef enum Mips64Function {
-	MIPS64_FUNCT_DADDU = 0x2D // function from documentation
+	MIPS64_FUNCT_ADD		= 0x20,
+	MIPS64_FUNCT_ADDU		= 0x21,
+	MIPS64_FUNCT_DADDU      = 0x2D,
 } Mips64Function;
 
 // RELEASE DECODE INSTRUCTION
