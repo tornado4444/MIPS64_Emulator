@@ -46,6 +46,12 @@ typedef enum Mips64Endian {
 	MIPS64_ENDIAN_BIG = 1
 } Mips64Endian;
 
+typedef enum Mips64Identifier {
+	UNPREDICTABLE, 
+	UNDEFINED,
+	UNSTABLE
+};
+
 typedef enum Mips64StopReason {
 	MIPS64_STOP_REASON_NONE = 0,
 	MIPS64_STOP_NOT_IMPLEMENTED,

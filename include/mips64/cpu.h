@@ -16,6 +16,8 @@ typedef struct Mips64CPU {
      */
     uint64_t hi; // Multiply and Divide register higher result(lower Release 6)
     uint64_t lo; // LO - Multiply and Divide register lower result(lower Release 6)
+    bool branch_pending;
+    uint32_t branch_target;
 } Mips64CPU;
 
 Mips64Status mips64_cpu_reset(Mips64CPU* cpu, uint64_t reset_pc);

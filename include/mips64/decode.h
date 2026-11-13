@@ -29,6 +29,8 @@ typedef struct Mips64Decoded {
 
 	uint16_t immediate;
 	uint16_t offset;
+	bool branch_pending;
+	uint32_t branch_target;
 	uint32_t target;
 } Mips64Decoded;
 
@@ -57,6 +59,8 @@ typedef enum Mips64Opcode {
 	MIPS64_OPCODE_BNEL		= 0x15,
 	MIPS64_OPCODE_BLEZL		= 0x16, // WARNING: Removed for Release 6
 	MIPS64_OPCODE_BGTZL		= 0x17,	// WARNING: Removed for Release 6
+	MIPS64_OPCODE_DADDI		= 0x18,
+	MIPS64_OPCODE_DADDIU	= 0x19,
 	MIPS64_OPCODE_LDL		= 0x1A,
 	MIPS64_OPCODE_LDR		= 0x1B,
 	// SPECIAL2 = 0x1C,
