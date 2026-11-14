@@ -1,6 +1,9 @@
 #include <stdio.h>
+#include <immintrin.h>
+#include <intrin.h>
 
 #include "mips64/execute.h"
+
 
 static uint64_t sign_extension(uint16_t value)
 {
@@ -11,6 +14,9 @@ static uint64_t zero_extend(uint16_t zero_extend_value) {
 	return (uint64_t)zero_extend_value;
 }
 
+static bool NotWordValue(uint64_t value) {
+	return value != (uint64_t)(int64_t)(uint32_t)(int32_t)value;
+}
 
 static Mips64Status mips64_execute_nop(Mips64CPU* cpu, const Mips64Decoded* instruction) { //  0x000000
 	if (cpu == NULL || instruction == NULL) {
@@ -448,6 +454,127 @@ static Mips64Status mips64_execute_daddu(Mips64CPU* cpu, const Mips64Decoded* in
 	if (instruction->rd != 0) {
 		cpu->gpr[instruction->rd] = temp;
 	}
+
+	cpu->gpr[0] = UINT64_C(0);
+	cpu->pc += UINT64_C(4);
+
+	return MIPS64_STATUS_OK;
+}
+
+
+static Mips64Status mips64_execute_ddiv(Mips64CPU* cpu, const Mips64Decoded* instruction) {
+	if (cpu == NULL || instruction == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+
+	(int64_t)cpu->lo = cpu->gpr[instruction->rs] / cpu->gpr[instruction->rt];
+	(int64_t)cpu->hi = cpu->gpr[instruction->rs] % cpu->gpr[instruction->rt];
+
+	if (cpu->gpr[instruction->rt] != 0) {
+		UNPREDICTABLE;
+	}
+
+	cpu->gpr[0] = INT64_C(0);
+	cpu->pc += INT64_C(4);
+
+	return MIPS64_STATUS_OK;
+}
+
+static Mips64Status mips64_execute_ddivu(Mips64CPU* cpu, const Mips64Decoded* instruction) {
+	if (cpu == NULL || instruction == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+	uint64_t inst_rs = cpu->gpr[instruction->rs];
+	uint64_t inst_rt = cpu->gpr[instruction->rt];
+
+
+	if (cpu->gpr[instruction->rt] == UINT64_C(0)) {
+		UNPREDICTABLE;
+	}
+
+	uint64_t q = inst_rs / inst_rt;
+	uint64_t r = inst_rs % inst_rt;
+
+	cpu->lo = q;
+	cpu->hi = r;
+
+	cpu->gpr[0] = UINT64_C(0);
+	cpu->pc += INT64_C(4);
+
+	return MIPS64_STATUS_OK;
+}
+
+static Mips64Status mips64_execute_div(Mips64CPU* cpu, const Mips64Decoded* instruction) {
+	if (cpu == NULL || instruction == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+
+	int32_t q = (int32_t)cpu->gpr[instruction->rs] / (int32_t)cpu->gpr[instruction->rt];
+	cpu->lo = (uint64_t)(int64_t)q;
+	int32_t r = (int32_t)cpu->gpr[instruction->rs] % (int32_t)cpu->gpr[instruction->rt];
+	cpu->hi = (uint64_t)(int64_t)r;
+
+	if (NotWordValue(cpu->gpr[instruction->rs]) || NotWordValue(cpu->gpr[instruction->rt])) {
+		UNPREDICTABLE;
+	}
+
+	cpu->gpr[0] = INT64_C(0);
+	cpu->pc += INT64_C(4);
+
+	return MIPS64_STATUS_OK;
+}
+
+static Mips64Status mips64_execute_divu(Mips64CPU* cpu, const Mips64Decoded* instruction) {
+	if (cpu == NULL || instruction == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+
+	uint32_t q = (uint32_t)cpu->gpr[instruction->rs] / (uint32_t)cpu->gpr[instruction->rt];
+	uint32_t r = (uint32_t)cpu->gpr[instruction->rs] % (uint32_t)cpu->gpr[instruction->rt];
+	cpu->lo = (uint64_t)(int64_t)q;
+	cpu->hi = (uint64_t)(int64_t)r;
+
+	if (NotWordValue(cpu->gpr[instruction->rs]) || NotWordValue(cpu->gpr[instruction->rt])) {
+		UNPREDICTABLE;
+	}
+
+	cpu->gpr[0] = UINT64_C(0);
+	cpu->pc += UINT64_C(4);
+
+	return MIPS64_STATUS_OK;
+}
+
+static Mips64Status mips64_execute_dmult(Mips64CPU* cpu, const Mips64Decoded* instruction) {
+	if (cpu == NULL || instruction == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+
+	int64_t p = (int64_t)cpu->gpr[instruction->rs];
+	int64_t d = (int64_t)cpu->gpr[instruction->rt];
+
+	int64_t prod = p * d;
+
+	cpu->lo = prod;
+	cpu->hi = _umul128(p, d, & prod);
+
+	cpu->gpr[0] = INT64_C(0);
+	cpu->pc += INT64_C(4);
+
+	return MIPS64_STATUS_OK;
+}
+
+static Mips64Status mips64_execute_dmultu(Mips64CPU* cpu, const Mips64Decoded* instruction) {
+	if (cpu == NULL || instruction == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+
+	uint64_t p = cpu->gpr[instruction->rs];
+	uint64_t d = cpu->gpr[instruction->rt];
+
+	uint64_t prod = p * d;
+
+	cpu->lo = prod;
+	cpu->hi = _umul128(p, d, &prod);
 
 	cpu->gpr[0] = UINT64_C(0);
 	cpu->pc += UINT64_C(4);
