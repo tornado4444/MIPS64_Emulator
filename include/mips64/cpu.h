@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mips64/core.h"
+#include <stdbool.h>
 
 // RELEASE THE CPU MIPS64	
 typedef struct Mips64CPU {
@@ -17,6 +18,7 @@ typedef struct Mips64CPU {
     uint64_t hi; // Multiply and Divide register higher result(lower Release 6)
     uint64_t lo; // LO - Multiply and Divide register lower result(lower Release 6)
     bool branch_pending;
+    uint32_t branch_mode;
     uint32_t branch_target;
 } Mips64CPU;
 

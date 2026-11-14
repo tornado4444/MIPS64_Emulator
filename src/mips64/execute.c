@@ -112,15 +112,203 @@ static Mips64Status mips64_execute_beql(Mips64CPU* cpu, const Mips64Decoded* ins
 
 	int64_t target_offset = (int64_t)(int16_t)instruction->offset * INT64_C(4);
 	bool condition = (cpu->gpr[instruction->rs] == cpu->gpr[instruction->rt]);
-
 	
 	if (condition) {
 		cpu->branch_target = cpu->pc + UINT64_C(4) + (uint64_t)target_offset;
 
 		cpu->branch_pending = true;
+		cpu->branch_mode = MIPS64_BRANCH_LIKELY;
+
+		cpu->pc += 4;
 	}
 	else {
+		cpu->pc += 8;
+	}
 
+	cpu->gpr[0] = UINT64_C(0);
+	cpu->pc += UINT64_C(4);
+
+	return MIPS64_STATUS_OK;
+}
+
+static Mips64Status mips64_execute_bgtz(Mips64CPU* cpu, const Mips64Decoded* instruction) {
+	if (cpu == NULL || instruction == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+
+	/*
+		Operation:
+		I: target_offset ← sign_extend(offset || 0^2)
+			condition ← GPR[rs] > 0^GPRLEN
+		0^GPRLEN - for MIPS64 it's 64 zero bits, since in our case it will read the full 64-bits
+		I+1: if condition then
+			PC ← PC + target_offset
+		endif
+	*/
+
+	int64_t target_offset = (int64_t)(int16_t)instruction->offset * INT64_C(4);
+	bool condition = cpu->gpr[instruction->rs] > INT64_C(0);  
+
+	if (condition) {
+		cpu->branch_target = cpu->pc + UINT64_C(4) + (uint64_t)target_offset;
+
+		cpu->branch_pending = true;
+	}
+
+	cpu->gpr[0] = UINT64_C(0);
+	cpu->pc += UINT64_C(4);
+
+	return MIPS64_STATUS_OK;
+}
+
+static Mips64Status mips64_execute_bgtz(Mips64CPU* cpu, const Mips64Decoded* instruction) {
+	if (cpu == NULL || instruction == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+
+	int64_t target_offset = (int64_t)(int16_t)instruction->offset * INT64_C(4);
+	bool condition = (cpu->gpr[instruction->rs] > INT64_C(0));
+
+	if (condition) {
+		cpu->branch_target = cpu->pc + UINT64_C(4) + (uint64_t)target_offset;
+
+		cpu->branch_pending = true;
+		cpu->branch_mode = MIPS64_BRANCH_LIKELY;
+
+		cpu->pc += 4;
+	}
+	else {
+		cpu->pc += 8;
+	}
+
+	cpu->gpr[0] = UINT64_C(0);
+	cpu->pc += UINT64_C(4);
+
+	return MIPS64_STATUS_OK;
+}
+
+static Mips64Status mips64_execute_blez(Mips64CPU* cpu, const Mips64Decoded* instruction) {
+	if (cpu == NULL || instruction == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+
+	int64_t target_offset = (int64_t)(int16_t)instruction->offset * INT64_C(4);
+	bool condition = cpu->gpr[instruction->rs] <= INT64_C(0);
+
+	if (condition) {
+		cpu->branch_target = cpu->pc + UINT64_C(4) + (uint64_t)target_offset;
+
+		cpu->branch_pending = true;
+	}
+
+	cpu->gpr[0] = UINT64_C(0);
+	cpu->pc += UINT64_C(4);
+
+	return MIPS64_STATUS_OK;
+}
+
+static Mips64Status mips64_execute_blezl(Mips64CPU* cpu, const Mips64Decoded* instruction) {
+	if (cpu == NULL || instruction == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+
+	int64_t target_offset = (int64_t)(int16_t)instruction->offset * INT64_C(4);
+	bool condition = cpu->gpr[instruction->rs] <= INT64_C(0);
+
+	if (condition) {
+		cpu->branch_target = cpu->pc + UINT64_C(4) + (uint64_t)target_offset;
+
+		cpu->branch_pending = true;
+		cpu->branch_mode = MIPS64_BRANCH_LIKELY;
+
+		cpu->pc += 4;
+	}
+	else {
+		cpu->pc += 8;
+	}
+
+	cpu->gpr[0] = UINT64_C(0);
+	cpu->pc += UINT64_C(4);
+
+	return MIPS64_STATUS_OK;
+}
+
+static Mips64Status mips64_execute_bne(Mips64CPU* cpu, const Mips64Decoded* instruction)  {
+	if (cpu == NULL || instruction == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+
+
+	int64_t target_offset = (int64_t)(int16_t)instruction->offset * INT64_C(4);
+	bool condition = (cpu->gpr[instruction->rs] != cpu->gpr[instruction->rt]);
+
+	if (condition) {
+		cpu->branch_target = cpu->pc + UINT64_C(4) + (uint64_t)target_offset;
+
+		cpu->branch_pending = true;
+	}
+
+	cpu->gpr[0] = UINT64_C(0);
+	cpu->pc += UINT64_C(4);
+
+	return MIPS64_STATUS_OK;
+}
+
+static Mips64Status mips64_execute_bnel(Mips64CPU* cpu, const Mips64Decoded* instruction) {
+	if (cpu == NULL || instruction == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+
+
+	int64_t target_offset = (int64_t)(int16_t)instruction->offset * INT64_C(4);
+	bool condition = (cpu->gpr[instruction->rs] != cpu->gpr[instruction->rt]);
+
+	if (condition) {
+		cpu->branch_target = cpu->pc + UINT64_C(4) + (uint64_t)target_offset;
+
+		cpu->branch_pending = true;
+		cpu->branch_mode = MIPS64_BRANCH_LIKELY;
+
+		cpu += 4;
+	}
+	else {
+		cpu += 8;
+	}
+
+	cpu->gpr[0] = UINT64_C(0);
+	cpu->pc += UINT64_C(4);
+
+	return MIPS64_STATUS_OK;
+}
+
+// TODO CACHE
+// static Mips64Status mips64_execute_daddi(Mips64CPU* cpu, const Mips64Decoded* instruction) {}
+
+static Mips64Status mips64_execute_daddi(Mips64CPU* cpu, const Mips64Decoded* instruction) {
+	if (cpu == NULL || instruction == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+
+	int64_t lhs = (int64_t)cpu->gpr[instruction->rs];
+	int64_t imm = (int64_t)(int16_t)instruction->immediate;
+
+	/*
+		TODO CHECK ON FUTURE THE TEST FOR CORRECT! OPERATION FROM DOCUMENTATION:
+			temp ← (GPR[rs]63||GPR[rs]) + sign_extend(immediate)
+			if (temp64 ≠ temp63) then
+				SignalException(IntegerOverflow)
+			else
+				GPR[rt] ← temp63..0
+			endif
+	*/
+	if ((imm > 0 && lhs > INT64_MAX - imm) || (imm < 0 && lhs < INT64_MIN - imm)) {
+		return MIPS64_STATUS_INTEGER_OVERFLOW;
+	}
+
+	int64_t temp = lhs + imm;
+
+	if (instruction->rt != 0) {
+		cpu->gpr[instruction->rt] = (uint64_t)temp;
 	}
 
 	cpu->gpr[0] = UINT64_C(0);
@@ -136,12 +324,12 @@ static Mips64Status mips64_execute_daddiu(Mips64CPU* cpu, const Mips64Decoded* i
 
 	uint64_t source = cpu->gpr[instruction->rs];
 
-	uint64_t immediate = sign_extension(instruction->immediate);
+	uint64_t imm = sign_extension(instruction->immediate);
 
-	uint64_t result = source + immediate;
+	uint64_t temp = source + imm;
 
 	if (instruction->rt != 0u) {
-		cpu->gpr[instruction->rt] = result;
+		cpu->gpr[instruction->rt] = temp;
 	}
 
 	cpu->gpr[0] = UINT64_C(0);
@@ -150,6 +338,7 @@ static Mips64Status mips64_execute_daddiu(Mips64CPU* cpu, const Mips64Decoded* i
 	return MIPS64_STATUS_OK;
 
 }
+
 static Mips64Status mips64_execute_special(Mips64CPU* cpu, const Mips64Decoded* instruction) {
 	if (cpu == NULL) {
 		return MIPS64_STATUS_INVALID_ARGUMENT;
@@ -227,23 +416,51 @@ static Mips64Status mips64_execute_and(Mips64CPU* cpu, const Mips64Decoded* inst
 	return MIPS64_STATUS_OK;
 }
 
-static Mips64Status mips64_execute_daddu(Mips64CPU* cpu, const Mips64Decoded* instruction) { // Operation: GPR[rt]  GPR[rs] + sign_extend(immediate)
+static Mips64Status mips64_execute_dadd(Mips64CPU* cpu, const Mips64Decoded* instruction) { // Operation: GPR[rt]  GPR[rs] + sign_extend(immediate)
 	if (cpu == NULL || instruction == NULL) {
 		return MIPS64_STATUS_INVALID_ARGUMENT;
 	}
-	
-	uint64_t result;
 
-	result = cpu->gpr[instruction->rs] + cpu->gpr[instruction->rt];
+	int64_t rhs = (int64_t)cpu->gpr[instruction->rs];
+	int64_t rts = (int64_t)cpu->gpr[instruction->rt];
+
+	if ((rts > 0 && rhs > INT64_MAX - rts) || (rts < 0 && rhs < INT64_MIN - rts)) {
+		return MIPS64_STATUS_INTEGER_OVERFLOW;
+	}
 
 	if (instruction->rd != 0) {
-		cpu->gpr[instruction->rd] = result;
+		cpu->gpr[instruction->rd] = cpu->gpr[instruction->rs] + cpu->gpr[instruction->rt];
 	}
 
 	cpu->gpr[0] = UINT64_C(0);
 	cpu->pc += UINT64_C(4);
 
 	return MIPS64_STATUS_OK;
+}
+
+static Mips64Status mips64_execute_daddu(Mips64CPU* cpu, const Mips64Decoded* instruction) { // Operation: GPR[rt]  GPR[rs] + sign_extend(immediate)
+	if (cpu == NULL || instruction == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+	
+	uint64_t temp = cpu->gpr[instruction->rs] + cpu->gpr[instruction->rt];
+
+	if (instruction->rd != 0) {
+		cpu->gpr[instruction->rd] = temp;
+	}
+
+	cpu->gpr[0] = UINT64_C(0);
+	cpu->pc += UINT64_C(4);
+
+	return MIPS64_STATUS_OK;
+}
+
+static Mips64Status mips64_execute_break(Mips64CPU* cpu, const Mips64Decoded* instruction) {
+	if (cpu == NULL || instruction == NULL) {
+		return MIPS64_STATUS_INVALID_ARGUMENT;
+	}
+
+	return MIPS64_STATUS_BREAKPOINT;
 }
 
 Mips64Status mips64_cpu_execute(Mips64CPU* cpu, const Mips64Decoded* raw_instruction) {

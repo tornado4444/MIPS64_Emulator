@@ -50,8 +50,7 @@ target_sources(MIPS64_Core
 		src/mips64/elf_loader.c
 		src/mips64/jit_compiler_x64.c
 	PUBLIC
-		${HEADER_LIST}
-)
+		${HEADER_LIST})
 
 target_include_directories(MIPS64_Core
 	PUBLIC

@@ -29,8 +29,6 @@ typedef struct Mips64Decoded {
 
 	uint16_t immediate;
 	uint16_t offset;
-	bool branch_pending;
-	uint32_t branch_target;
 	uint32_t target;
 } Mips64Decoded;
 

@@ -38,7 +38,8 @@ typedef enum Mips64Status {
 	MIPS64_STATUS_NOT_IMPLEMENTED,
 
 	MIPS64_STATUS_INTERNAL_ERROR,
-	MIPS64_STATUS_INTEGER_OVERFLOW
+	MIPS64_STATUS_INTEGER_OVERFLOW,
+	MIPS64_STATUS_BREAKPOINT
 } Mips64Status;
 
 typedef enum Mips64Endian {
@@ -95,6 +96,12 @@ typedef struct Mips64RunInfo {
 	Mips64StopReason stop_reason;
 	Mips64Status last_status;
 } Mips64RunInfo;
+
+typedef enum Mips64BrachMode {
+	MIPS64_BRANCH_NONE,
+	MIPS64_BRANCH_DELAYED,
+	MIPS64_BRANCH_LIKELY
+} Mips64BrachMode;
 
 typedef struct Mips64Emulator Mips64Emulator;
 
