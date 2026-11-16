@@ -29,6 +29,7 @@ typedef struct Mips64Decoded {
 
 	uint16_t immediate;
 	uint16_t offset;
+	uint32_t shamt;
 	uint32_t target;
 } Mips64Decoded;
 
